@@ -1,0 +1,18 @@
+{
+  "name": "SKU 照片命名相机",
+  "short_name": "SKU Camera",
+  "description": "上传 SKU 文件，按编号自动命名拍摄的照片",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007AFF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

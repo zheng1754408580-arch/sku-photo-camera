@@ -36,12 +36,26 @@ export default function CameraPage() {
     if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
     setStatus("loading");
     try {
+      try {
+        if (typeof navigator.permissions?.query === "function") {
+          const result = await navigator.permissions.query({ name: "camera" as PermissionName });
+          if (result.state === "denied") {
+            setStatus("no-permission");
+            return;
+          }
+        }
+      } catch {
+        // permissions API 不可用或不被支持时忽略，继续请求摄像头
+      }
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: {
+          facingMode: facing,
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
         audio: false,
       });
       streamRef.current = stream;
-      if (videoRef.current) { videoRef.current.srcObject = stream; await videoRef.current.play(); }
       setStatus("ready");
     } catch (err) {
       const e = err as DOMException;
@@ -53,9 +67,22 @@ export default function CameraPage() {
 
   useEffect(() => {
     if (hydrated) startCamera(facingMode);
-    return () => { if (streamRef.current) { streamRef.current.getTracks().forEach((t) => t.stop()); streamRef.current = null; } };
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
+
+  useEffect(() => {
+    if (status !== "ready" || !videoRef.current || !streamRef.current) return;
+    const video = videoRef.current;
+    const stream = streamRef.current;
+    video.srcObject = stream;
+    video.play().catch(() => {});
+  }, [status]);
 
   const handleToggleCamera = useCallback(() => {
     const next = facingMode === "environment" ? "user" : "environment";

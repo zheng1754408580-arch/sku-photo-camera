@@ -14,6 +14,7 @@ export default function AppHomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const skuCount = skuList.length;
   const photoCount = hydrated ? getTotalPhotoCount() : 0;
@@ -56,7 +57,12 @@ export default function AppHomePage() {
       <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
         <div className="relative flex h-11 items-center justify-center px-4">
           <span className="text-sm font-semibold">SKU 照片命名相机</span>
-          <button className="absolute right-3 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
+          <button
+            type="button"
+            onClick={() => setShowSettings(true)}
+            className="absolute right-2 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center rounded-full bg-gray-100 active:bg-gray-200"
+            aria-label="设置"
+          >
             <svg
               className="h-[18px] w-[18px] text-gray-500"
               fill="none"
@@ -150,14 +156,14 @@ export default function AppHomePage() {
                 </svg>
                 解析中…
               </>
-            ) : hasData() ? (
+            ) : hydrated && hasData() ? (
               "重新上传 SKU 文件"
             ) : (
               "上传 SKU 文件"
             )}
           </button>
 
-          {hasData() && (
+          {hydrated && hasData() && (
             <>
               <button
                 onClick={handleEnterCamera}
@@ -180,6 +186,43 @@ export default function AppHomePage() {
       <p className="py-6 text-center text-xs text-gray-300">
         Designed &amp; Built by Jaden Zheng
       </p>
+
+      {/* 设置 / 关于 弹窗 */}
+      {showSettings && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+          onClick={() => setShowSettings(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-t-2xl bg-white p-6 shadow-xl sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold">关于</h2>
+              <button
+                type="button"
+                onClick={() => setShowSettings(false)}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-gray-500 active:bg-gray-100"
+                aria-label="关闭"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-sm text-gray-600">SKU 照片命名相机</p>
+            <p className="mt-1 text-xs text-gray-400">上传 SKU 文件，按编号自动命名拍摄的照片</p>
+            <p className="mt-4 text-center text-xs text-gray-400">Designed &amp; Built by Jaden Zheng</p>
+            <button
+              type="button"
+              onClick={() => setShowSettings(false)}
+              className="mt-6 w-full rounded-xl bg-gray-100 py-3 text-sm font-medium text-gray-700 active:bg-gray-200"
+            >
+              关闭
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

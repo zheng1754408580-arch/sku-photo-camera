@@ -204,7 +204,9 @@ export function FittingAnnotationEditor({
     image.onload = () => {
       imageRef.current = image;
       const ratio = image.naturalHeight / image.naturalWidth;
-      const width = Math.min(window.innerWidth - 32, MAX_CANVAS_WIDTH);
+      const maxWidth = Math.min(window.innerWidth - 40, MAX_CANVAS_WIDTH);
+      const maxHeight = Math.max(220, window.innerHeight - 320);
+      const width = Math.min(maxWidth, maxHeight / ratio);
       setImageSize({ width: image.naturalWidth, height: image.naturalHeight });
       setDisplaySize({ width, height: width * ratio });
     };
@@ -366,8 +368,8 @@ export function FittingAnnotationEditor({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-4">
-      <div className="mx-auto flex max-w-4xl flex-col rounded-2xl bg-white shadow-xl">
+    <div className="fixed inset-0 z-50 bg-black/80 p-4">
+      <div className="mx-auto flex h-[calc(100dvh-2rem)] max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
           <div>
             <h3 className="text-base font-semibold text-gray-900">添加批注</h3>
@@ -410,7 +412,7 @@ export function FittingAnnotationEditor({
           </button>
         </div>
 
-        <div className="overflow-auto bg-gray-950 px-4 py-4">
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-gray-950 px-4 py-3">
           <canvas
             ref={canvasRef}
             className="mx-auto touch-none rounded-xl bg-black"
@@ -421,7 +423,7 @@ export function FittingAnnotationEditor({
           />
         </div>
 
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
           <p className="text-xs text-gray-500">文字工具点击画面后输入内容。保存后可再次编辑。</p>
           <div className="flex gap-2">
             <button

@@ -294,7 +294,7 @@ export function FittingSessionWorkspace({
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-black text-white">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-black text-white">
       <canvas ref={canvasRef} className="hidden" />
 
       <div className="absolute inset-x-0 top-0 z-20 bg-gradient-to-b from-black/80 to-transparent pb-8 pt-[env(safe-area-inset-top)]">
@@ -317,20 +317,30 @@ export function FittingSessionWorkspace({
                 : "请选择本次轮次"}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setFacingMode((prev) => (prev === "environment" ? "user" : "environment"))}
-            className="rounded-full bg-black/40 p-2 text-white backdrop-blur-sm"
-            disabled={!session}
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleCompleteSession}
+              disabled={!session}
+              className="rounded-full bg-green-500/85 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm disabled:opacity-50"
+            >
+              完成
+            </button>
+            <button
+              type="button"
+              onClick={() => setFacingMode((prev) => (prev === "environment" ? "user" : "environment"))}
+              className="rounded-full bg-black/40 p-2 text-white backdrop-blur-sm"
+              disabled={!session}
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="relative flex-1 overflow-hidden">
+      <div className="relative h-[39dvh] min-h-[220px] flex-none overflow-hidden sm:h-[46dvh]">
         {session && status === "ready" && (
           <video
             ref={videoRef}
@@ -378,8 +388,8 @@ export function FittingSessionWorkspace({
         {session && flash && <div className="absolute inset-0 z-10 bg-white" />}
       </div>
 
-      <div className="border-t border-white/10 bg-black pb-[env(safe-area-inset-bottom)]">
-        <div className="px-4 pt-3">
+      <div className="flex min-h-0 flex-1 flex-col border-t border-white/10 bg-black pb-[env(safe-area-inset-bottom)]">
+        <div className="px-4 pt-2.5">
           <div className="flex rounded-full bg-white/10 p-1">
             <button
               type="button"
@@ -387,7 +397,7 @@ export function FittingSessionWorkspace({
                 setTab("detail");
                 setError("");
               }}
-              className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition ${
+              className={`flex-1 rounded-full px-3 py-1.5 text-sm font-medium transition ${
                 tab === "detail" ? "bg-white text-black" : "text-white/70"
               }`}
               disabled={!session}
@@ -400,7 +410,7 @@ export function FittingSessionWorkspace({
                 setTab("standard");
                 setError("");
               }}
-              className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition ${
+              className={`flex-1 rounded-full px-3 py-1.5 text-sm font-medium transition ${
                 tab === "standard" ? "bg-white text-black" : "text-white/70"
               }`}
               disabled={!session}
@@ -411,7 +421,7 @@ export function FittingSessionWorkspace({
         </div>
 
         {session && tab === "standard" && (
-          <div className="px-4 pt-3">
+          <div className="px-4 pt-2.5">
             <div className="grid grid-cols-3 gap-2">
               {STANDARD_SHOT_TYPES.map((type) => {
                 const done = standardStatus[type];
@@ -420,7 +430,7 @@ export function FittingSessionWorkspace({
                     key={type}
                     type="button"
                     onClick={() => setCurrentShotType(type)}
-                    className={`rounded-xl border px-3 py-3 text-sm transition ${
+                    className={`rounded-xl border px-3 py-2.5 text-sm transition ${
                       currentShotType === type
                         ? "border-blue-400 bg-blue-500/20 text-white"
                         : "border-white/10 bg-white/5 text-white/80"
@@ -434,21 +444,21 @@ export function FittingSessionWorkspace({
                 );
               })}
             </div>
-            <p className="mt-2 text-xs text-white/50">
+            <p className="mt-1.5 text-[11px] text-white/50">
               请完成 Front / Side / Back 拍摄后再完成本次 Session。
             </p>
           </div>
         )}
 
         {(error || notice) && (
-          <div className="px-4 pt-3">
+          <div className="px-4 pt-2.5">
             {error && (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-100">
                 {error}
               </div>
             )}
             {!error && notice && (
-              <div className="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-100">
+              <div className="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2.5 text-sm text-green-100">
                 {notice}
               </div>
             )}
@@ -456,10 +466,10 @@ export function FittingSessionWorkspace({
         )}
 
         {session && activePhotos.length > 0 && (
-          <div ref={galleryRef} className="flex gap-3 overflow-x-auto px-4 py-3">
+          <div ref={galleryRef} className="flex gap-2.5 overflow-x-auto px-4 py-2.5">
             {activePhotos.map((photo) => (
-              <div key={photo.id} className="w-32 flex-shrink-0 overflow-hidden rounded-2xl bg-white/10">
-                <img src={photo.uri} alt={photo.fileName} className="h-28 w-full object-cover" />
+              <div key={photo.id} className="w-28 flex-shrink-0 overflow-hidden rounded-2xl bg-white/10">
+                <img src={photo.uri} alt={photo.fileName} className="h-20 w-full object-cover" />
                 <div className="space-y-1 px-2 py-2">
                   <p className="truncate text-[11px] text-white/80">{photo.fileName}</p>
                   <div className="flex gap-1">
@@ -467,7 +477,7 @@ export function FittingSessionWorkspace({
                       <button
                         type="button"
                         onClick={() => setAnnotatingPhotoId(photo.id)}
-                        className="flex-1 rounded-lg bg-blue-500 px-2 py-1 text-[11px] font-medium text-white"
+                        className="flex-1 rounded-lg bg-blue-500 px-2 py-1 text-[10px] font-medium text-white"
                       >
                         {photo.isAnnotated ? "继续批注" : "添加批注"}
                       </button>
@@ -475,7 +485,7 @@ export function FittingSessionWorkspace({
                     <button
                       type="button"
                       onClick={() => handleDelete(photo.id)}
-                      className="rounded-lg bg-white/15 px-2 py-1 text-[11px] text-white/80"
+                      className="rounded-lg bg-white/15 px-2 py-1 text-[10px] text-white/80"
                     >
                       删除
                     </button>
@@ -486,7 +496,7 @@ export function FittingSessionWorkspace({
           </div>
         )}
 
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-3">
           <button
             type="button"
             onClick={() => handleSwitchSku("prev")}
@@ -501,9 +511,9 @@ export function FittingSessionWorkspace({
             type="button"
             onClick={handleCapture}
             disabled={!session || status !== "ready" || capturing}
-            className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-[3px] border-white transition active:scale-95 disabled:opacity-50"
+            className="flex h-[64px] w-[64px] items-center justify-center rounded-full border-[3px] border-white transition active:scale-95 disabled:opacity-50"
           >
-            <div className="h-[58px] w-[58px] rounded-full bg-white transition active:bg-gray-200" />
+            <div className="h-[50px] w-[50px] rounded-full bg-white transition active:bg-gray-200" />
           </button>
           <button
             type="button"
@@ -515,29 +525,6 @@ export function FittingSessionWorkspace({
               <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
             </svg>
           </button>
-        </div>
-
-        <div className="px-4 pb-2">
-          <button
-            type="button"
-            onClick={handleCompleteSession}
-            disabled={!session}
-            className="w-full rounded-xl bg-green-500 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            完成并保存本次 Fitting Session
-          </button>
-        </div>
-
-        <div className="flex items-center justify-center gap-4 px-4 pb-4 text-center text-xs text-white/50">
-          {currentIndex > 0 && <span className="max-w-[100px] truncate">← {skuList[currentIndex - 1]}</span>}
-          <span>
-            {!session
-              ? "请选择轮次后开始拍摄。"
-              : tab === "detail"
-                ? `Detail Review · ${currentIndex + 1} / ${skuList.length}`
-                : `${PHOTO_TYPE_LABELS[currentShotType]} · ${currentIndex + 1} / ${skuList.length}`}
-          </span>
-          {currentIndex < skuList.length - 1 && <span className="max-w-[100px] truncate">{skuList[currentIndex + 1]} →</span>}
         </div>
       </div>
 

@@ -92,17 +92,47 @@ export default function CameraPage() {
 
   const handleCapture = useCallback(() => {
     if (!videoRef.current || !canvasRef.current || !sku || capturing) return;
-    setCapturing(true); setFlash(true);
-    setTimeout(() => setFlash(false), 150);
-    const video = videoRef.current; const canvas = canvasRef.current;
-    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d")!;
-    if (facingMode === "user") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
-    ctx.drawImage(video, 0, 0);
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-    addPhoto(sku, dataUrl);
-    setTimeout(() => { if (thumbnailsRef.current) thumbnailsRef.current.scrollLeft = thumbnailsRef.current.scrollWidth; }, 50);
-    setCapturing(false);
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    setCapturing(true);
+    setFlash(true);
+
+    window.setTimeout(() => setFlash(false), 150);
+
+    try {
+      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || video.videoWidth === 0 || video.videoHeight === 0) {
+        throw new Error("Camera frame is not ready yet");
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("2D canvas context is unavailable");
+
+      ctx.save();
+      if (facingMode === "user") {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(video, 0, 0);
+      ctx.restore();
+
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      addPhoto(sku, dataUrl);
+
+      window.setTimeout(() => {
+        if (thumbnailsRef.current) {
+          thumbnailsRef.current.scrollLeft = thumbnailsRef.current.scrollWidth;
+        }
+      }, 50);
+    } catch (error) {
+      console.error("Failed to capture photo", error);
+    } finally {
+      setCapturing(false);
+    }
   }, [sku, capturing, facingMode, addPhoto]);
 
   const handleDelete = useCallback((fileName: string) => { deletePhoto(sku, fileName); }, [sku, deletePhoto]);

@@ -45,37 +45,54 @@ export function pickFile(): Promise<File> {
     input.accept = getAcceptString();
     input.style.display = "none";
 
-    let picked = false;
+    let settled = false;
 
-    input.addEventListener("change", () => {
-      picked = true;
+    const cleanup = () => {
+      input.removeEventListener("change", handleChange);
+      input.removeEventListener("cancel", handleCancel);
+      window.removeEventListener("focus", handleFocus);
+      try {
+        document.body.removeChild(input);
+      } catch {}
+    };
+
+    const settle = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      callback();
+    };
+
+    const handleChange = () => {
       const file = input.files?.[0];
-      document.body.removeChild(input);
-      if (!file) {
-        reject(new FileParseError("USER_CANCELLED", "未选择文件"));
-        return;
-      }
-      resolve(file);
-    });
+      settle(() => {
+        if (!file) {
+          reject(new FileParseError("USER_CANCELLED", "未选择文件"));
+          return;
+        }
+        resolve(file);
+      });
+    };
 
-    input.addEventListener("cancel", () => {
-      picked = true;
-      document.body.removeChild(input);
-      reject(new FileParseError("USER_CANCELLED", ""));
-    });
+    const handleCancel = () => {
+      settle(() => {
+        reject(new FileParseError("USER_CANCELLED", ""));
+      });
+    };
 
-    window.addEventListener(
-      "focus",
-      () => {
-        setTimeout(() => {
-          if (!picked) {
-            try { document.body.removeChild(input); } catch {}
-            reject(new FileParseError("USER_CANCELLED", ""));
-          }
-        }, 500);
-      },
-      { once: true },
-    );
+    const handleFocus = () => {
+      window.setTimeout(() => {
+        if (settled) return;
+        if (input.files?.length) return;
+        settle(() => {
+          reject(new FileParseError("USER_CANCELLED", ""));
+        });
+      }, 1000);
+    };
+
+    input.addEventListener("change", handleChange);
+    input.addEventListener("cancel", handleCancel);
+    window.addEventListener("focus", handleFocus, { once: true });
 
     document.body.appendChild(input);
     input.click();

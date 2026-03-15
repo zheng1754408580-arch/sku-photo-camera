@@ -1,6 +1,10 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import type { PhotoItem } from "@/store/photoStore";
+
+export interface ExportablePhotoItem {
+  uri: string;
+  fileName: string;
+}
 
 function dataUrlToBlob(dataUrl: string): Blob {
   const parts = dataUrl.split(",");
@@ -18,7 +22,7 @@ export interface ExportProgress {
 }
 
 export async function exportAsZip(
-  photosMap: Record<string, PhotoItem[]>,
+  photosMap: Record<string, ExportablePhotoItem[]>,
   selectedSkus: string[],
   onProgress?: (p: ExportProgress) => void,
 ): Promise<void> {
@@ -49,7 +53,7 @@ export async function exportAsZip(
 }
 
 export async function sharePhotos(
-  photosMap: Record<string, PhotoItem[]>,
+  photosMap: Record<string, ExportablePhotoItem[]>,
   selectedSkus: string[],
   onProgress?: (p: ExportProgress) => void,
 ): Promise<void> {

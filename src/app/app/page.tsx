@@ -4,12 +4,16 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSkuStore } from "@/store/skuStore";
 import { usePhotoStore } from "@/store/photoStore";
+import { useFittingSessionStore } from "@/store/fittingSessionStore";
 import { pickFile, parseFile, FileParseError } from "@/services/fileParser";
+import { Button } from "@/components/ui/Button";
+import { SurfaceCard } from "@/components/ui/SurfaceCard";
 
 export default function AppHomePage() {
   const router = useRouter();
   const { skuList, setSkuList, hasData } = useSkuStore();
   const { getTotalPhotoCount } = usePhotoStore();
+  const { getTotalPhotoCount: getFittingTotalPhotoCount } = useFittingSessionStore();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,7 +22,7 @@ export default function AppHomePage() {
   const [showSettings, setShowSettings] = useState(false);
 
   const skuCount = skuList.length;
-  const photoCount = hydrated ? getTotalPhotoCount() : 0;
+  const photoCount = hydrated ? getTotalPhotoCount() + getFittingTotalPhotoCount() : 0;
 
   useEffect(() => {
     setHydrated(true);
@@ -56,19 +60,19 @@ export default function AppHomePage() {
   }, [router]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-gray-50">
+    <div className="app-page flex min-h-dvh flex-col">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
+      <header className="sticky top-0 z-40 border-b border-soft bg-[hsl(var(--surface-raised))/0.9] backdrop-blur-lg">
         <div className="relative flex h-11 items-center justify-center px-4">
-          <span className="text-sm font-semibold">SKU 照片命名相机</span>
+          <span className="text-sm font-semibold tracking-[-0.01em]">SKU 照片命名相机</span>
           <button
             type="button"
             onClick={() => setShowSettings(true)}
-            className="absolute right-2 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center rounded-full bg-gray-100 active:bg-gray-200"
+            className="absolute right-2 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center rounded-full bg-surface-raised shadow-soft transition hover:bg-secondary active:scale-[0.98]"
             aria-label="设置"
           >
             <svg
-              className="h-[18px] w-[18px] text-gray-500"
+              className="h-[18px] w-[18px] text-muted-foreground"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
@@ -92,108 +96,82 @@ export default function AppHomePage() {
       {/* 主体内容 */}
       <div className="flex flex-1 flex-col items-center px-6 pt-10">
         {/* 相机图标 */}
-        <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-blue-50">
+        <div className="icon-badge mb-4 h-24 w-24 bg-primary-soft">
           <span className="text-5xl">📷</span>
         </div>
 
         {/* 标题 */}
-        <h1 className="mb-1.5 text-xl font-bold">SKU 照片命名相机</h1>
-        <p className="mb-6 text-center text-sm text-gray-400">
+        <h1 className="section-title mb-1.5 text-xl">SKU 照片命名相机</h1>
+        <p className="mb-6 text-center text-sm text-muted-foreground">
           上传 SKU 文件，按编号自动命名拍摄的照片
         </p>
 
         {/* 数据卡片 */}
-        <div className="mb-8 w-full max-w-xs rounded-2xl bg-white px-4 py-5 shadow-sm">
+        <SurfaceCard className="mb-8 w-full max-w-xs px-4 py-5 shadow-soft">
           <div className="flex items-center">
             <div className="flex flex-1 flex-col items-center">
-              <span className="text-xs text-gray-400">SKU 数量</span>
-              <span className="mt-1 text-2xl font-bold text-blue-500">
+              <span className="text-xs text-muted-foreground">SKU 数量</span>
+              <span className="mt-1 text-2xl font-bold text-primary">
                 {hydrated ? skuCount : "-"}{" "}
                 <span className="text-sm font-medium">个</span>
               </span>
             </div>
-            <div className="h-10 w-px bg-gray-200" />
+            <div className="hairline-divider h-10 w-px" />
             <div className="flex flex-1 flex-col items-center">
-              <span className="text-xs text-gray-400">已拍照片</span>
-              <span className="mt-1 text-2xl font-bold text-blue-500">
+              <span className="text-xs text-muted-foreground">已拍照片</span>
+              <span className="mt-1 text-2xl font-bold text-primary">
                 {hydrated ? photoCount : "-"}{" "}
                 <span className="text-sm font-medium">张</span>
               </span>
             </div>
           </div>
-        </div>
+        </SurfaceCard>
 
         {/* 错误提示 */}
         {error && (
-          <div className="mb-4 w-full max-w-xs rounded-xl border border-red-100 bg-red-50 px-4 py-3">
-            <p className="text-center text-sm text-red-700">{error}</p>
+          <div className="status-note status-note-danger mb-4 w-full max-w-xs">
+            <p className="text-center">{error}</p>
           </div>
         )}
 
         {notice && (
-          <div className="mb-4 w-full max-w-xs rounded-xl border border-green-100 bg-green-50 px-4 py-3">
-            <p className="text-center text-sm text-green-700">{notice}</p>
+          <div className="status-note status-note-success mb-4 w-full max-w-xs">
+            <p className="text-center">{notice}</p>
           </div>
         )}
 
         {/* 按钮组 */}
         <div className="w-full max-w-xs space-y-3">
-          <button
-            onClick={handleUpload}
-            disabled={loading}
-            className="flex w-full items-center justify-center rounded-xl bg-blue-500 px-4 py-3.5 font-semibold text-white transition hover:bg-blue-600 active:scale-[0.98] disabled:opacity-60"
-          >
+          <Button onClick={handleUpload} loading={loading} fullWidth>
             {loading ? (
-              <>
-                <svg
-                  className="mr-2 h-4 w-4 animate-spin"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  />
-                </svg>
-                解析中…
-              </>
+              "解析中…"
             ) : hydrated && hasData() ? (
               "重新上传 SKU 文件"
             ) : (
               "上传 SKU 文件"
             )}
-          </button>
+          </Button>
 
           {hydrated && hasData() && (
             <>
-              <button
+              <Button
                 onClick={handleEnterCamera}
-                className="w-full rounded-xl bg-green-500 px-4 py-3.5 font-semibold text-white transition hover:bg-green-600 active:scale-[0.98]"
+                variant="primary"
+                fullWidth
+                className="bg-[hsl(var(--success))] hover:brightness-[0.98]"
               >
                 进入拍摄
-              </button>
-              <button
-                onClick={handleViewList}
-                className="w-full rounded-xl border border-blue-500 px-4 py-3.5 font-semibold text-blue-500 transition hover:bg-blue-50 active:scale-[0.98]"
-              >
+              </Button>
+              <Button onClick={handleViewList} variant="secondary" fullWidth>
                 查看 SKU 列表
-              </button>
+              </Button>
             </>
           )}
         </div>
       </div>
 
       {/* 署名 */}
-      <p className="py-6 text-center text-xs text-gray-300">
+      <p className="py-6 text-center text-xs tracking-[0.12em] text-muted-foreground/60">
         Designed &amp; Built by Jaden Zheng
       </p>
 
@@ -204,15 +182,15 @@ export default function AppHomePage() {
           onClick={() => setShowSettings(false)}
         >
           <div
-            className="w-full max-w-sm rounded-t-2xl bg-white p-6 shadow-xl sm:rounded-2xl"
+            className="app-panel w-full max-w-sm rounded-t-[2rem] p-6 sm:rounded-[2rem]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold">关于</h2>
+              <h2 className="section-title text-lg">关于</h2>
               <button
                 type="button"
                 onClick={() => setShowSettings(false)}
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-gray-500 active:bg-gray-100"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-muted-foreground transition hover:bg-secondary active:scale-[0.98]"
                 aria-label="关闭"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -220,16 +198,18 @@ export default function AppHomePage() {
                 </svg>
               </button>
             </div>
-            <p className="text-sm text-gray-600">SKU 照片命名相机</p>
-            <p className="mt-1 text-xs text-gray-400">上传 SKU 文件，按编号自动命名拍摄的照片</p>
-            <p className="mt-4 text-center text-xs text-gray-400">Designed &amp; Built by Jaden Zheng</p>
-            <button
+            <p className="text-sm text-foreground">SKU 照片命名相机</p>
+            <p className="mt-1 text-xs text-muted-foreground">上传 SKU 文件，按编号自动命名拍摄的照片</p>
+            <p className="mt-4 text-center text-xs text-muted-foreground">Designed &amp; Built by Jaden Zheng</p>
+            <Button
               type="button"
               onClick={() => setShowSettings(false)}
-              className="mt-6 w-full rounded-xl bg-gray-100 py-3 text-sm font-medium text-gray-700 active:bg-gray-200"
+              variant="secondary"
+              fullWidth
+              className="mt-6"
             >
               关闭
-            </button>
+            </Button>
           </div>
         </div>
       )}

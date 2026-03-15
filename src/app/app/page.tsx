@@ -13,6 +13,7 @@ export default function AppHomePage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -25,15 +26,18 @@ export default function AppHomePage() {
 
   const handleUpload = useCallback(async () => {
     setError("");
+    setNotice("");
     setLoading(true);
     try {
       const file = await pickFile();
       const list = await parseFile(file);
       setSkuList(list);
+      setNotice(`已识别 ${list.length} 个 SKU`);
     } catch (err) {
       if (err instanceof FileParseError && err.code === "USER_CANCELLED") {
         // noop
       } else {
+        console.error("Failed to parse SKU file", err);
         setError(
           err instanceof FileParseError ? err.message : "文件解析失败，请重试",
         );
@@ -123,6 +127,12 @@ export default function AppHomePage() {
         {error && (
           <div className="mb-4 w-full max-w-xs rounded-xl border border-red-100 bg-red-50 px-4 py-3">
             <p className="text-center text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
+        {notice && (
+          <div className="mb-4 w-full max-w-xs rounded-xl border border-green-100 bg-green-50 px-4 py-3">
+            <p className="text-center text-sm text-green-700">{notice}</p>
           </div>
         )}
 

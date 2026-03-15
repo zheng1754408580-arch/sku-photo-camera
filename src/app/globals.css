@@ -1,7 +1,246 @@
 @import "tailwindcss";
 
+:root {
+  --background: 40 33% 96%;
+  --foreground: 220 20% 20%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 20% 20%;
+  --primary: 217 55% 45%;
+  --primary-soft: 216 62% 95%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 22% 92%;
+  --secondary-foreground: 220 20% 20%;
+  --surface-soft: 36 38% 98%;
+  --surface-raised: 0 0% 100%;
+  --surface-tint: 216 62% 97%;
+  --muted: 40 20% 94%;
+  --muted-foreground: 218 12% 48%;
+  --success: 154 46% 40%;
+  --success-soft: 148 48% 94%;
+  --success-foreground: 155 55% 24%;
+  --warning: 35 88% 48%;
+  --warning-soft: 42 100% 95%;
+  --warning-foreground: 32 75% 28%;
+  --destructive: 0 72% 55%;
+  --destructive-soft: 0 86% 96%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 18% 88%;
+  --input: 220 18% 86%;
+  --ring: 217 55% 45%;
+  --radius: 1.5rem;
+  --radius-pill: 9999px;
+  --shadow-soft: 0 8px 24px hsl(220 20% 20% / 0.04);
+  --shadow-card: 0 16px 40px hsl(220 20% 20% / 0.06);
+  --shadow-elevated: 0 24px 60px hsl(220 20% 20% / 0.09);
+}
+
 html {
   -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans), Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+.bg-background {
+  background-color: hsl(var(--background));
+}
+
+.bg-card {
+  background-color: hsl(var(--card));
+}
+
+.text-foreground {
+  color: hsl(var(--foreground));
+}
+
+.text-card-foreground {
+  color: hsl(var(--card-foreground));
+}
+
+.text-muted-foreground {
+  color: hsl(var(--muted-foreground));
+}
+
+.bg-primary {
+  background-color: hsl(var(--primary));
+}
+
+.text-primary {
+  color: hsl(var(--primary));
+}
+
+.text-primary-foreground {
+  color: hsl(var(--primary-foreground));
+}
+
+.bg-primary-soft {
+  background-color: hsl(var(--primary-soft));
+}
+
+.bg-secondary {
+  background-color: hsl(var(--secondary));
+}
+
+.text-secondary-foreground {
+  color: hsl(var(--secondary-foreground));
+}
+
+.bg-surface-soft {
+  background-color: hsl(var(--surface-soft));
+}
+
+.bg-surface-raised {
+  background-color: hsl(var(--surface-raised));
+}
+
+.bg-surface-tint {
+  background-color: hsl(var(--surface-tint));
+}
+
+.border-input {
+  border-color: hsl(var(--input));
+}
+
+.border-destructive {
+  border-color: hsl(var(--destructive));
+}
+
+.text-destructive {
+  color: hsl(var(--destructive));
+}
+
+.bg-destructive-soft {
+  background-color: hsl(var(--destructive-soft));
+}
+
+.bg-success-soft {
+  background-color: hsl(var(--success-soft));
+}
+
+.text-success-foreground {
+  color: hsl(var(--success-foreground));
+}
+
+.bg-warning-soft {
+  background-color: hsl(var(--warning-soft));
+}
+
+.text-warning-foreground {
+  color: hsl(var(--warning-foreground));
+}
+
+.border-soft {
+  border-color: hsl(var(--border) / 0.72);
+}
+
+.rounded-pill {
+  border-radius: var(--radius-pill);
+}
+
+.shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+.shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+.shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+}
+
+.font-body {
+  font-family: var(--font-sans), Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.app-page {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top, hsl(var(--surface-tint)) 0%, transparent 36%),
+    hsl(var(--background));
+}
+
+.app-shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 32rem;
+}
+
+.app-panel {
+  border: 1px solid hsl(var(--border) / 0.7);
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-card);
+  border-radius: 1.75rem;
+}
+
+.app-panel-soft {
+  border: 1px solid hsl(var(--border) / 0.6);
+  background: hsl(var(--surface-raised) / 0.92);
+  box-shadow: var(--shadow-soft);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(12px);
+}
+
+.section-title {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.status-note {
+  border-radius: 1.25rem;
+  border: 1px solid hsl(var(--border) / 0.64);
+  padding: 0.9rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.status-note-success {
+  background: hsl(var(--success-soft));
+  border-color: hsl(var(--success) / 0.18);
+  color: hsl(var(--success-foreground));
+}
+
+.status-note-warning {
+  background: hsl(var(--warning-soft));
+  border-color: hsl(var(--warning) / 0.18);
+  color: hsl(var(--warning-foreground));
+}
+
+.status-note-danger {
+  background: hsl(var(--destructive-soft));
+  border-color: hsl(var(--destructive) / 0.18);
+  color: hsl(var(--destructive));
+}
+
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--border) / 0.56);
+  background: hsl(var(--surface-tint));
+  color: hsl(var(--primary));
+  box-shadow: var(--shadow-soft);
+}
+
+.hairline-divider {
+  background: hsl(var(--border) / 0.68);
 }
 
 .scrollbar-hide {

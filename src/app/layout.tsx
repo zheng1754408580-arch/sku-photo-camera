@@ -1,5 +1,16 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-display",
+});
 
 export const metadata: Metadata = {
   title: "SKU 照片命名相机",
@@ -30,7 +41,9 @@ export default function RootLayout({
       <head>
         <link rel="apple-touch-icon" href="/icons/icon.svg" />
       </head>
-      <body className="antialiased bg-gray-50 text-gray-900 min-h-dvh">
+      <body
+        className={`${inter.variable} ${plusJakartaSans.variable} min-h-dvh bg-background font-sans antialiased text-foreground`}
+      >
         {children}
       </body>
     </html>

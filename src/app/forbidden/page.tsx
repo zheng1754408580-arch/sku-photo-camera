@@ -3,6 +3,8 @@
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth";
+import { Button } from "@/components/ui/Button";
+import { SurfaceCard } from "@/components/ui/SurfaceCard";
 
 export default function ForbiddenPage() {
   const router = useRouter();
@@ -17,11 +19,11 @@ export default function ForbiddenPage() {
   }, [router]);
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center px-6">
-      <div className="mx-auto w-full max-w-sm text-center">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-orange-50">
+    <div className="app-page flex min-h-dvh flex-col items-center justify-center px-6">
+      <SurfaceCard className="mx-auto w-full max-w-sm px-6 py-7 text-center">
+        <div className="icon-badge mx-auto mb-5 h-16 w-16 bg-warning-soft text-warning-foreground">
           <svg
-            className="h-8 w-8 text-orange-500"
+            className="h-8 w-8"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
@@ -35,26 +37,20 @@ export default function ForbiddenPage() {
           </svg>
         </div>
 
-        <h1 className="mb-2 text-xl font-bold">无访问权限</h1>
-        <p className="mb-8 text-sm text-gray-500">
+        <h1 className="section-title mb-2 text-xl">无访问权限</h1>
+        <p className="mb-8 text-sm text-muted-foreground">
           你没有权限访问该页面。此功能仅限管理员使用。
         </p>
 
         <div className="space-y-3">
-          <button
-            onClick={handleBack}
-            className="w-full rounded-xl bg-blue-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-600 active:scale-[0.98]"
-          >
+          <Button onClick={handleBack} fullWidth>
             返回应用
-          </button>
-          <button
-            onClick={handleLogout}
-            className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-600 transition hover:bg-gray-50 active:scale-[0.98]"
-          >
+          </Button>
+          <Button onClick={handleLogout} variant="secondary" fullWidth>
             退出登录
-          </button>
+          </Button>
         </div>
-      </div>
+      </SurfaceCard>
     </div>
   );
 }

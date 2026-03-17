@@ -43,7 +43,7 @@ export default function SKUListPage() {
 
   const totalPhotos = useMemo(
     () => getTotalPhotoCount() + getFittingTotalPhotoCount(),
-    [getFittingTotalPhotoCount, getTotalPhotoCount, photos],
+    [getFittingTotalPhotoCount, getTotalPhotoCount],
   );
   const progress = skuList.length > 0 ? completedCount / skuList.length : 0;
 
@@ -89,14 +89,15 @@ export default function SKUListPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-lg flex-col">
-      <div className="sticky top-12 z-30 border-b border-soft bg-[hsl(var(--surface-raised))/0.9] px-4 pb-3 pt-4 backdrop-blur-lg">
-        <div className="mb-3">
-          <div className="mb-1.5 flex items-baseline justify-between">
-            <span className="text-sm font-semibold text-foreground">已完成 {completedCount} / {skuList.length}</span>
+    <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] max-w-[430px] flex-col px-4 pb-4 pt-4">
+      <div className="app-panel mb-3 px-4 py-4">
+        <div className="mb-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">SKU List</p>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="section-title text-lg text-foreground">已完成 {completedCount} / {skuList.length}</span>
             <span className="text-xs text-muted-foreground">共 {totalPhotos} 张照片</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-secondary">
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-secondary">
             <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${progress * 100}%` }} />
           </div>
         </div>
@@ -112,18 +113,18 @@ export default function SKUListPage() {
               </button>
             )}
           </div>
-          <Link href="/app/export" className="flex items-center gap-1 rounded-pill border border-soft bg-surface-raised px-3 py-2 text-sm font-semibold text-foreground shadow-soft transition hover:bg-secondary">
+          <Link href="/app/export" className="flex h-10 items-center gap-1 rounded-pill border border-soft bg-surface-raised px-3 text-sm font-semibold text-foreground shadow-soft transition hover:bg-secondary">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
             导出
           </Link>
-          <button onClick={() => setShowClearConfirm(true)} className="flex items-center gap-1 rounded-pill border border-[hsl(var(--destructive))/0.2] bg-[hsl(var(--destructive-soft))] px-3 py-2 text-sm font-semibold text-destructive transition hover:brightness-[0.99]">
+          <button onClick={() => setShowClearConfirm(true)} className="flex h-10 items-center gap-1 rounded-pill border border-[hsl(var(--destructive))/0.2] bg-[hsl(var(--destructive-soft))] px-3 text-sm font-semibold text-destructive transition hover:brightness-[0.99]">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
             清除
           </button>
         </div>
       </div>
 
-      <div className="flex-1 px-4 py-3">
+      <div className="flex-1">
         {(error || notice) && (
           <div className="mb-3">
             {error && <div className="status-note status-note-danger">{error}</div>}
@@ -142,7 +143,7 @@ export default function SKUListPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-1.5 pb-28">
+          <div className="space-y-2 pb-28">
             {filtered.map((sku, i) => (
               <SKUItem
                 key={sku}
@@ -156,7 +157,7 @@ export default function SKUListPage() {
         )}
       </div>
 
-      <div className="sticky bottom-0 z-20 border-t border-soft bg-[hsl(var(--surface-raised))/0.94] px-4 py-4 pb-[calc(env(safe-area-inset-bottom)+16px)] backdrop-blur-lg">
+      <div className="sticky bottom-0 z-20 mt-3 rounded-[1.75rem] border border-soft bg-[hsl(var(--surface-raised))/0.94] px-4 py-4 pb-[calc(env(safe-area-inset-bottom)+16px)] shadow-card backdrop-blur-xl">
         <div className="flex gap-3">
           <Button
             onClick={handleReupload}
@@ -177,7 +178,7 @@ export default function SKUListPage() {
       </div>
 
       {showClearConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[hsl(var(--foreground))/0.22] px-6 backdrop-blur-sm">
           <SurfaceCard className="w-full max-w-xs p-6">
             <h3 className="section-title mb-2 text-center text-base">清除所有数据？</h3>
             <p className="mb-6 text-center text-sm text-muted-foreground">将删除所有 SKU 列表和已拍照片数据，此操作不可恢复。</p>

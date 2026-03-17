@@ -41,11 +41,11 @@ export function AuthLanding() {
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background px-0 sm:px-6 sm:py-6">
-      <div className="relative flex h-[100dvh] w-[min(100vw,calc(100dvh*1760/3824))] max-w-full flex-col overflow-hidden bg-background sm:h-[956px] sm:w-auto sm:max-w-[440px] sm:rounded-[2.5rem] sm:shadow-elevated">
+      <div className="relative flex h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-background sm:h-[956px] sm:w-auto sm:max-w-[440px] sm:rounded-[2.5rem] sm:shadow-elevated">
         <img
           src="/brand/login-bg-fitnote.png"
           alt="FitNote background illustration"
-          className="pointer-events-none absolute inset-0 h-full w-full object-contain object-top"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
         />
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(248,245,238,0.02),rgba(248,245,238,0.08)_40%,rgba(248,245,238,0.42)_62%,rgba(248,245,238,0.88)_78%,rgba(248,245,238,0.98)_100%)]" />
 

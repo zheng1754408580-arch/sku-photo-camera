@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FittingAnnotationEditor } from "@/components/FittingAnnotationEditor";
+import { Button } from "@/components/ui/Button";
+import { SurfaceCard } from "@/components/ui/SurfaceCard";
 import {
   FITTING_ROUNDS,
   FITTING_ROUND_LABELS,
@@ -53,7 +55,7 @@ export function FittingSessionWorkspace({
 
   const [status, setStatus] = useState<CameraStatus>("loading");
   const [tab, setTab] = useState<WorkspaceTab>("detail");
-  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
+  const [facingMode] = useState<"environment" | "user">("environment");
   const [capturing, setCapturing] = useState(false);
   const [flash, setFlash] = useState(false);
   const [currentShotType, setCurrentShotType] = useState<StandardShotType>("front");
@@ -90,6 +92,10 @@ export function FittingSessionWorkspace({
     [standardStatus],
   );
   const activePhotos = tab === "detail" ? detailPhotos : standardPhotos;
+  const previewStripPhotos = useMemo(
+    () => session?.photos.slice(-6) ?? [],
+    [session],
+  );
   const annotatingPhoto = useMemo(
     () => detailPhotos.find((photo) => photo.id === annotatingPhotoId) ?? null,
     [annotatingPhotoId, detailPhotos],
@@ -280,39 +286,92 @@ export function FittingSessionWorkspace({
 
   if (!selectedSku && showRoundPicker) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center bg-black px-6 text-white">
-        <p className="mb-4 text-sm text-white/70">请先选择款号后再进入拍摄</p>
-        <button
-          type="button"
-          onClick={() => router.push("/app/sku-list")}
-          className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black"
-        >
-          返回款号列表
-        </button>
+      <div className="app-page flex min-h-dvh items-center justify-center px-6">
+        <SurfaceCard className="w-full max-w-sm p-6 text-center">
+          <p className="mb-4 text-sm text-muted-foreground">请先选择款号后再进入拍摄</p>
+          <Button type="button" onClick={() => router.push("/app/sku-list")}>
+            返回款号列表
+          </Button>
+        </SurfaceCard>
       </div>
     );
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-black text-white">
+    <div className="relative h-[100dvh] overflow-hidden bg-black text-white">
       <canvas ref={canvasRef} className="hidden" />
 
-      <div className="absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-black via-black/92 to-transparent pb-8 pt-[env(safe-area-inset-top)]">
-        <div className="flex items-start px-5 pt-3">
+      <div className="absolute inset-0">
+        {session && status === "ready" && (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className={`h-full w-full object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
+          />
+        )}
+        {session && status === "loading" && (
+          <div className="flex h-full items-center justify-center bg-black">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+          </div>
+        )}
+        {session && status === "no-permission" && (
+          <div className="flex h-full flex-col items-center justify-center bg-black px-8">
+            <p className="mb-1 text-sm font-medium text-white">需要相机权限</p>
+            <p className="mb-4 text-center text-xs text-white/60">请在浏览器设置中允许使用相机</p>
+            <button
+              type="button"
+              onClick={() => startCamera(facingMode)}
+              className="rounded-pill border border-white/20 bg-white/10 px-4 py-2 text-sm text-white"
+            >
+              重试
+            </button>
+          </div>
+        )}
+        {session && status === "no-camera" && (
+          <div className="flex h-full items-center justify-center bg-black px-8 text-sm text-white">
+            未检测到相机
+          </div>
+        )}
+        {session && status === "error" && (
+          <div className="flex h-full flex-col items-center justify-center bg-black px-8">
+            <p className="mb-3 text-sm text-white/70">相机启动失败</p>
+            <button
+              type="button"
+              onClick={() => startCamera(facingMode)}
+              className="rounded-pill border border-white/20 bg-white/10 px-4 py-2 text-sm text-white"
+            >
+              重试
+            </button>
+          </div>
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(6,8,10,0.44),transparent_18%,transparent_70%,rgba(6,8,10,0.62))]" />
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-[10%] top-[12%] h-10 w-10 rounded-tl-[1.15rem] border-l-2 border-t-2 border-white/84" />
+          <div className="absolute right-[10%] top-[12%] h-10 w-10 rounded-tr-[1.15rem] border-r-2 border-t-2 border-white/84" />
+          <div className="absolute bottom-[22%] left-[10%] h-10 w-10 rounded-bl-[1.15rem] border-b-2 border-l-2 border-white/84" />
+          <div className="absolute bottom-[22%] right-[10%] h-10 w-10 rounded-br-[1.15rem] border-b-2 border-r-2 border-white/84" />
+        </div>
+        {session && flash && <div className="absolute inset-0 z-10 bg-white" />}
+      </div>
+
+      <div className="absolute inset-x-0 top-0 z-20 px-4 pt-[calc(env(safe-area-inset-top)+10px)]">
+        <div className="mx-auto flex w-full max-w-[430px] items-start gap-3 rounded-[1.4rem] border border-white/10 bg-black/18 px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-2xl">
           <button
             type="button"
             onClick={() => router.push(backPath)}
-            className="text-sm font-medium tracking-[-0.01em] text-white/82 transition hover:text-white"
+            className="rounded-pill border border-white/12 bg-white/[0.08] px-3 py-2 text-sm font-medium text-white/92 transition hover:bg-white/[0.12]"
           >
-            Back to List
+            List
           </button>
-          <div className="flex-1 px-3 pt-0.5 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/92">
+          <div className="min-w-0 flex-1 pt-0.5 text-center">
+            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.16em] text-white/92">
               {session?.styleNo ?? selectedSku}
             </p>
-            <p className="mt-1 text-[10px] font-medium tracking-[0.08em] text-white/42">
+            <p className="mt-1 text-[11px] text-white/56">
               {session
-                ? `${FITTING_ROUND_LABELS[session.fittingRound]} · ${session.photos.length} PHOTOS`
+                ? `${FITTING_ROUND_LABELS[session.fittingRound]} · ${session.photos.length} photos`
                 : "请选择本次轮次"}
             </p>
           </div>
@@ -320,187 +379,101 @@ export function FittingSessionWorkspace({
             type="button"
             onClick={handleCompleteSession}
             disabled={!session}
-            className="text-sm font-medium tracking-[-0.01em] text-[#C8FF3D] transition hover:text-[#E5FF8A] disabled:opacity-40"
+            className="rounded-pill border border-white/12 bg-white/[0.08] px-3 py-2 text-sm font-medium text-white/92 transition hover:bg-white/[0.12] disabled:opacity-40"
           >
             Export
           </button>
         </div>
       </div>
 
-      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 pt-16">
-        <div className="relative w-full max-w-[246px] overflow-hidden rounded-[2rem] bg-black shadow-[0_32px_80px_rgba(0,0,0,0.55)] aspect-[9/16]">
-          {session && status === "ready" && (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className={`h-full w-full object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
-            />
-          )}
-          {session && status === "loading" && (
-            <div className="flex h-full items-center justify-center bg-black">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+      <div className="absolute inset-x-0 bottom-0 z-20 px-4 pb-[calc(env(safe-area-inset-bottom)+10px)]">
+        <div className="mx-auto w-full max-w-[430px]">
+          {(error || notice) && (
+            <div className="mb-2">
+              <div className={`rounded-[1rem] border px-3.5 py-2 text-sm backdrop-blur-2xl ${
+                error
+                  ? "border-white/10 bg-[rgba(104,21,21,0.42)] text-white/92"
+                  : "border-white/10 bg-white/[0.08] text-white/88"
+              }`}>
+                {error || notice}
+              </div>
             </div>
           )}
-          {session && status === "no-permission" && (
-            <div className="flex h-full flex-col items-center justify-center bg-black px-8">
-              <p className="mb-1 text-sm font-medium text-white">需要相机权限</p>
-              <p className="mb-4 text-center text-xs text-white/60">请在浏览器设置中允许使用相机</p>
-              <button
-                type="button"
-                onClick={() => startCamera(facingMode)}
-                className="rounded-pill border border-white/20 bg-white/8 px-4 py-2 text-sm text-white"
-              >
-                重试
-              </button>
-            </div>
-          )}
-          {session && status === "no-camera" && (
-            <div className="flex h-full items-center justify-center bg-black px-8 text-sm text-white">
-              未检测到相机
-            </div>
-          )}
-          {session && status === "error" && (
-            <div className="flex h-full flex-col items-center justify-center bg-black px-8">
-              <p className="mb-3 text-sm text-white/70">相机启动失败</p>
-              <button
-                type="button"
-                onClick={() => startCamera(facingMode)}
-                className="rounded-pill border border-white/20 bg-white/8 px-4 py-2 text-sm text-white"
-              >
-                重试
-              </button>
-            </div>
-          )}
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute left-[14%] top-[16%] h-9 w-9 rounded-tl-[1rem] border-l-2 border-t-2 border-white/88" />
-            <div className="absolute right-[14%] top-[16%] h-9 w-9 rounded-tr-[1rem] border-r-2 border-t-2 border-white/88" />
-            <div className="absolute bottom-[16%] left-[14%] h-9 w-9 rounded-bl-[1rem] border-b-2 border-l-2 border-white/88" />
-            <div className="absolute bottom-[16%] right-[14%] h-9 w-9 rounded-br-[1rem] border-b-2 border-r-2 border-white/88" />
-          </div>
-          {session && flash && <div className="absolute inset-0 z-10 bg-white" />}
-        </div>
-      </div>
 
-      <div className="relative flex-none bg-black px-4 pb-[calc(env(safe-area-inset-bottom)+14px)] pt-2">
-        <div className="mx-auto max-w-sm">
-          <div className="mb-3 flex rounded-full bg-white/8 p-1">
-            <button
-              type="button"
-              onClick={() => {
-                setTab("detail");
-                setError("");
-              }}
-              className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition ${
-                tab === "detail" ? "bg-white text-black shadow-soft" : "text-white/58"
-              }`}
-              disabled={!session}
-            >
-              Detail Review
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setTab("standard");
-                setError("");
-              }}
-              className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition ${
-                tab === "standard" ? "bg-white text-black shadow-soft" : "text-white/58"
-              }`}
-              disabled={!session}
-            >
-              Standard Shots
-            </button>
-          </div>
-
-          {session && tab === "standard" && (
-            <div className="mb-3 grid grid-cols-3 gap-2">
-              {STANDARD_SHOT_TYPES.map((type) => {
-                const done = standardStatus[type];
-                return (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setCurrentShotType(type)}
-                    className={`rounded-[1.1rem] px-3 py-2.5 text-left transition ${
-                      currentShotType === type
-                        ? "bg-white text-black shadow-soft"
-                        : done
-                          ? "bg-[#112208] text-[#C8FF3D]"
-                          : "bg-white/6 text-white/68"
-                    }`}
+          <div className="mb-2 rounded-[1.5rem] border border-white/10 bg-black/18 px-3 py-2.5 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-2xl">
+            {tab === "detail" ? (
+              <div ref={galleryRef} className="flex gap-2 overflow-x-auto scrollbar-hide">
+                {(previewStripPhotos.length > 0 ? previewStripPhotos : activePhotos).map((photo) => (
+                  <div
+                    key={photo.id}
+                    className="group relative h-[60px] w-[48px] flex-shrink-0 overflow-hidden rounded-[0.95rem] border border-white/10 bg-white/[0.06]"
                   >
-                    <div className="text-sm font-semibold">{PHOTO_TYPE_LABELS[type]}</div>
-                    <div className="mt-0.5 text-[10px] uppercase tracking-[0.1em]">
-                      {done ? "DONE" : "OPEN"}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {error && (
-            <div className="mb-3 rounded-[1.2rem] border border-[#C8FF3D]/30 bg-[#10160A] px-4 py-3 text-sm text-[#E8FFC3]">
-              {error}
-            </div>
-          )}
-
-          {session && activePhotos.length > 0 && (
-            <div
-              ref={galleryRef}
-              className="mb-4 flex gap-2.5 overflow-x-auto pb-1"
-            >
-              {activePhotos.map((photo) => (
-                <div
-                  key={photo.id}
-                  className="group relative w-[88px] flex-shrink-0 overflow-hidden rounded-[1.25rem] bg-[#0E0E0E] shadow-[0_18px_36px_rgba(0,0,0,0.34)]"
-                >
-                  <img
-                    src={photo.uri}
-                    alt={photo.fileName}
-                    className="h-[118px] w-full object-cover"
-                  />
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/92 to-transparent" />
-                  <p className="absolute bottom-2 left-2 right-2 truncate text-[10px] font-medium text-white/82">
-                    {photo.fileName}
-                  </p>
-                  <div className="absolute right-2 top-2 flex gap-1.5 opacity-100 transition md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
-                    {photo.photoType === "detail" && (
+                    <img
+                      src={photo.uri}
+                      alt={photo.fileName}
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute right-1 top-1 flex gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                       <button
                         type="button"
                         onClick={() => setAnnotatingPhotoId(photo.id)}
-                        className="flex h-7 w-7 items-center justify-center rounded-full bg-black/58 text-white backdrop-blur-md"
+                        className={`flex h-5 w-5 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md ${photo.photoType !== "detail" ? "hidden" : ""}`}
                         aria-label={photo.isAnnotated ? "继续批注" : "添加批注"}
                       >
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487a2.1 2.1 0 1 1 2.97 2.97L8.25 19.04l-4.5 1.125 1.125-4.5L16.862 4.487Z" />
                         </svg>
                       </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(photo.id)}
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-black/58 text-white/88 backdrop-blur-md"
-                      aria-label="删除"
-                    >
-                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                      </svg>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(photo.id)}
+                        className="flex h-5 w-5 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md"
+                        aria-label="删除"
+                      >
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+                {previewStripPhotos.length === 0 && (
+                  <div className="flex h-[60px] items-center text-[12px] text-white/48">
+                    Capture detail photos
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                {STANDARD_SHOT_TYPES.map((type) => {
+                  const done = standardStatus[type];
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setCurrentShotType(type)}
+                      className={`flex min-w-0 flex-1 items-center justify-center rounded-pill px-3 py-2 text-[12px] font-medium transition ${
+                        currentShotType === type
+                          ? "bg-white/[0.18] text-white"
+                          : done
+                            ? "bg-white/[0.12] text-white/92"
+                            : "bg-white/[0.06] text-white/52"
+                      }`}
+                    >
+                      {PHOTO_TYPE_LABELS[type]}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
-          <div className="flex items-center justify-between px-2">
+          <div className="mb-2 flex items-center justify-between px-1">
             <button
               type="button"
               onClick={() => handleSwitchSku("prev")}
               disabled={currentIndex <= 0}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/8 bg-white/[0.04] text-white/88 transition hover:bg-white/[0.08] disabled:opacity-25"
+              className="flex h-[50px] w-[50px] items-center justify-center rounded-full border border-white/10 bg-black/18 text-white shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-2xl transition hover:bg-white/[0.12] disabled:opacity-25"
               aria-label="上一款"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
@@ -512,18 +485,18 @@ export function FittingSessionWorkspace({
               type="button"
               onClick={handleCapture}
               disabled={!session || status !== "ready" || capturing}
-              className="relative flex h-[84px] w-[84px] items-center justify-center rounded-full bg-white/6 shadow-[0_0_30px_rgba(255,255,255,0.14)] transition active:scale-95 disabled:opacity-40"
+              className="relative flex h-[88px] w-[88px] items-center justify-center rounded-full bg-black/18 shadow-[0_20px_50px_rgba(0,0,0,0.22)] backdrop-blur-2xl transition active:scale-95 disabled:opacity-40"
               aria-label="拍照"
             >
-              <span className="absolute inset-[7px] rounded-full border border-white/28" />
-              <span className="h-[56px] w-[56px] rounded-full bg-white shadow-[0_0_20px_rgba(255,255,255,0.16)]" />
+              <span className="absolute inset-[6px] rounded-full border border-white/62" />
+              <span className="h-[56px] w-[56px] rounded-full bg-[rgba(255,255,255,0.96)]" />
             </button>
 
             <button
               type="button"
               onClick={() => handleSwitchSku("next")}
               disabled={currentIndex >= skuList.length - 1}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/8 bg-white/[0.04] text-white/88 transition hover:bg-white/[0.08] disabled:opacity-25"
+              className="flex h-[50px] w-[50px] items-center justify-center rounded-full border border-white/10 bg-black/18 text-white shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-2xl transition hover:bg-white/[0.12] disabled:opacity-25"
               aria-label="下一款"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
@@ -532,21 +505,44 @@ export function FittingSessionWorkspace({
             </button>
           </div>
 
-          <div className="mt-3 flex items-center justify-center gap-2 text-[10px] font-medium uppercase tracking-[0.16em] text-white/34">
-            <span>{tab === "detail" ? "Detail Review" : PHOTO_TYPE_LABELS[currentShotType]}</span>
-            <span className="h-1 w-1 rounded-full bg-white/22" />
-            <span>
-              {currentIndex + 1}/{skuList.length}
-            </span>
+          <div className="mx-auto max-w-[220px] rounded-[1.2rem] border border-white/10 bg-black/18 p-1 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-2xl">
+            <div className="flex">
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("detail");
+                  setError("");
+                }}
+                className={`flex-1 rounded-[0.95rem] px-3 py-2 text-sm font-medium transition ${
+                  tab === "detail" ? "bg-white/[0.16] text-white" : "text-white/58"
+                }`}
+                disabled={!session}
+              >
+                Detail
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("standard");
+                  setError("");
+                }}
+                className={`flex-1 rounded-[0.95rem] px-3 py-2 text-sm font-medium transition ${
+                  tab === "standard" ? "bg-white/[0.16] text-white" : "text-white/58"
+                }`}
+                disabled={!session}
+              >
+                Fitting
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {showRoundPicker && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 px-6">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-gray-900 shadow-2xl">
-            <h2 className="text-lg font-bold">选择轮次</h2>
-            <p className="mt-1 text-sm text-gray-500">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/42 px-6 backdrop-blur-md">
+          <div className="w-full max-w-sm rounded-[2rem] border border-white/12 bg-[rgba(34,30,27,0.82)] p-6 text-white shadow-[0_22px_60px_rgba(0,0,0,0.26)] backdrop-blur-2xl">
+            <h2 className="text-lg font-semibold">选择轮次</h2>
+            <p className="mt-1 text-sm text-white/62">
               {selectedSku} 即将进入 Fitting Session，请先选择当前轮次。
             </p>
 
@@ -556,10 +552,10 @@ export function FittingSessionWorkspace({
                   key={item}
                   type="button"
                   onClick={() => setRound(item)}
-                  className={`rounded-xl border px-4 py-3 text-sm font-medium transition ${
+                  className={`rounded-[1.15rem] border px-4 py-3 text-sm font-medium transition ${
                     round === item
-                      ? "border-blue-500 bg-blue-50 text-blue-600"
-                      : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                      ? "border-white/18 bg-white/[0.18] text-white"
+                      : "border-white/10 bg-white/[0.06] text-white/66 hover:bg-white/[0.1]"
                   }`}
                 >
                   {FITTING_ROUND_LABELS[item]}
@@ -567,7 +563,7 @@ export function FittingSessionWorkspace({
               ))}
             </div>
 
-            <p className="mt-4 rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+            <p className="mt-4 rounded-[1.15rem] border border-white/10 bg-white/[0.06] px-4 py-3 text-sm text-white/68">
               命名预览：{selectedSku}_{round}_001.jpg
             </p>
 
@@ -575,14 +571,14 @@ export function FittingSessionWorkspace({
               <button
                 type="button"
                 onClick={() => router.push(backPath)}
-                className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-600"
+                className="flex-1 rounded-pill border border-white/10 bg-white/[0.08] px-4 py-3 text-sm font-medium text-white/86"
               >
                 取消
               </button>
               <button
                 type="button"
                 onClick={handleStartSession}
-                className="flex-1 rounded-xl bg-blue-500 px-4 py-3 text-sm font-semibold text-white"
+                className="flex-1 rounded-pill border border-white/16 bg-white/[0.18] px-4 py-3 text-sm font-semibold text-white"
               >
                 开始拍摄
               </button>

@@ -23,7 +23,6 @@ function ExportPageContent() {
   const { skuList } = useSkuStore();
   const { photos, getPhotoCount } = usePhotoStore();
   const {
-    sessions,
     getSession,
     getAllPhotosMap: getAllFittingPhotosMap,
     getPhotoCountForStyle,
@@ -37,7 +36,10 @@ function ExportPageContent() {
   const currentSession = sessionId ? getSession(sessionId) : null;
 
   useEffect(() => {
-    setHydrated(true);
+    const frame = window.requestAnimationFrame(() => {
+      setHydrated(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   const combinedPhotos = useMemo(() => {
@@ -59,7 +61,7 @@ function ExportPageContent() {
     });
 
     return next;
-  }, [currentSession, getAllFittingPhotosMap, photos, sessions]);
+  }, [currentSession, getAllFittingPhotosMap, photos]);
 
   const skusWithPhotos = useMemo(
     () =>
@@ -71,7 +73,10 @@ function ExportPageContent() {
 
   useEffect(() => {
     if (hydrated && skusWithPhotos.length > 0 && selected.size === 0) {
-      setSelected(new Set(skusWithPhotos));
+      const frame = window.requestAnimationFrame(() => {
+        setSelected(new Set(skusWithPhotos));
+      });
+      return () => window.cancelAnimationFrame(frame);
     }
   }, [hydrated, skusWithPhotos, selected.size]);
 
@@ -151,7 +156,7 @@ function ExportPageContent() {
 
   if (skusWithPhotos.length === 0) {
     return (
-      <div className="flex min-h-[calc(100dvh-3rem)] flex-col items-center justify-center px-6">
+      <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] max-w-[430px] flex-col items-center justify-center px-6">
         <p className="text-sm text-muted-foreground">暂无照片可导出</p>
         <p className="mt-1 text-xs text-muted-foreground/80">请先拍摄照片后再进行导出</p>
       </div>
@@ -165,9 +170,10 @@ function ExportPageContent() {
       : 0;
 
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-lg flex-col">
-      <div className="border-b border-soft bg-[hsl(var(--surface-raised))/0.9] px-4 py-4 backdrop-blur-lg">
-        <h2 className="section-title mb-1 text-lg">导出照片</h2>
+    <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] max-w-[430px] flex-col px-4 pb-4 pt-4">
+      <div className="app-panel px-4 py-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Export</p>
+        <h2 className="section-title mb-1 mt-2 text-lg">导出照片</h2>
         <p className="text-sm text-muted-foreground">
           {currentSession
             ? `当前导出 ${currentSession.styleNo} / ${currentSession.fittingRound} 本轮照片，共 ${totalSelected} 张`
@@ -175,7 +181,7 @@ function ExportPageContent() {
         </p>
       </div>
 
-      <div className="flex items-center justify-between border-b border-soft bg-[hsl(var(--surface-raised))/0.88] px-4 py-3">
+      <div className="mt-3 flex items-center justify-between rounded-[1.4rem] border border-soft bg-[hsl(var(--surface-raised))/0.88] px-4 py-3 shadow-soft">
         <button onClick={toggleAll} className="text-sm font-semibold text-primary transition hover:opacity-80">
           {allSelected ? "取消全选" : "全选"}
         </button>
@@ -184,7 +190,7 @@ function ExportPageContent() {
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-2">
+      <div className="flex-1 overflow-y-auto py-3">
         {skusWithPhotos.map((sku) => {
           const count = currentSession
             ? combinedPhotos[sku]?.length ?? 0
@@ -227,7 +233,7 @@ function ExportPageContent() {
       </div>
 
       {status.step === "exporting" && (
-        <div className="border-t border-soft bg-[hsl(var(--surface-raised))/0.88] px-4 py-3">
+        <div className="mt-2 rounded-[1.4rem] border border-soft bg-[hsl(var(--surface-raised))/0.88] px-4 py-3 shadow-soft">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-semibold text-primary">
               导出中… {status.progress.currentSku}
@@ -246,7 +252,7 @@ function ExportPageContent() {
       )}
 
       {status.step === "done" && (
-        <div className="border-t border-soft bg-success-soft px-4 py-3">
+        <div className="mt-2 rounded-[1.4rem] border border-soft bg-success-soft px-4 py-3 shadow-soft">
           <div className="flex items-center gap-2">
             <svg
               className="h-5 w-5 text-success-foreground"
@@ -269,12 +275,12 @@ function ExportPageContent() {
       )}
 
       {status.step === "error" && (
-        <div className="border-t border-soft bg-destructive-soft px-4 py-3">
+        <div className="mt-2 rounded-[1.4rem] border border-soft bg-destructive-soft px-4 py-3 shadow-soft">
           <p className="text-sm font-medium text-destructive">{status.message}</p>
         </div>
       )}
 
-      <div className="border-t border-soft bg-[hsl(var(--surface-raised))/0.92] px-4 py-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
+      <div className="sticky bottom-0 mt-3 rounded-[1.75rem] border border-soft bg-[hsl(var(--surface-raised))/0.92] px-4 py-4 pb-[calc(env(safe-area-inset-bottom)+16px)] shadow-card">
         <div className="flex gap-3">
           <Button
             onClick={handleExportZip}

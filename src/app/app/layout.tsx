@@ -16,11 +16,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-page flex min-h-dvh flex-col">
       {!isHome && (
-        <header className="sticky top-0 z-40 border-b border-soft bg-[hsl(var(--surface-raised))/0.86] backdrop-blur-lg">
-          <div className="mx-auto flex h-12 max-w-lg items-center px-4">
+        <header className="sticky top-0 z-40 border-b border-soft bg-[hsl(var(--surface-raised))/0.9] backdrop-blur-xl">
+          <div className="mx-auto flex h-14 max-w-[430px] items-center px-4">
             <Link
               href="/app"
-              className="flex items-center gap-1 text-sm font-semibold text-primary transition hover:opacity-80"
+              className="inline-flex items-center gap-1.5 rounded-pill bg-surface-raised px-3 py-2 text-sm font-semibold text-primary shadow-soft transition hover:opacity-80"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />

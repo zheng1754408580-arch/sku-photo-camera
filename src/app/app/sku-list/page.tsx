@@ -10,16 +10,20 @@ import { SKUItem } from "@/components/SKUItem";
 import { Button } from "@/components/ui/Button";
 import { SurfaceCard } from "@/components/ui/SurfaceCard";
 import { TextInput } from "@/components/ui/TextInput";
+import { pickFile, parseFile, FileParseError } from "@/services/fileParser";
 
 export default function SKUListPage() {
   const router = useRouter();
-  const { skuList, selectSku, clear: clearSku } = useSkuStore();
+  const { skuList, selectedSku, selectSku, setSkuList, clear: clearSku } = useSkuStore();
   const { photos, getPhotoCount, getTotalPhotoCount, clearAll: clearPhotos } = usePhotoStore();
   const { getPhotoCountForStyle, getTotalPhotoCount: getFittingTotalPhotoCount } = useFittingSessionStore();
 
   const [search, setSearch] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   useEffect(() => { setHydrated(true); }, []);
 
@@ -45,21 +49,43 @@ export default function SKUListPage() {
 
   const handleSelect = useCallback((sku: string) => { selectSku(sku); router.push("/app/camera"); }, [selectSku, router]);
 
+  const handleReupload = useCallback(async () => {
+    setError("");
+    setNotice("");
+    setUploading(true);
+    try {
+      const file = await pickFile();
+      const list = await parseFile(file);
+      setSkuList(list);
+      setSearch("");
+      setNotice(`已识别 ${list.length} 个 SKU`);
+    } catch (err) {
+      if (err instanceof FileParseError && err.code === "USER_CANCELLED") {
+        return;
+      }
+      console.error("Failed to re-upload SKU file", err);
+      setError(err instanceof FileParseError ? err.message : "文件解析失败，请重试");
+    } finally {
+      setUploading(false);
+    }
+  }, [setSkuList]);
+
+  const handleStartShooting = useCallback(() => {
+    const targetSku = selectedSku ?? filtered[0] ?? skuList[0];
+    if (!targetSku) {
+      setError("请先上传文件");
+      return;
+    }
+    selectSku(targetSku);
+    router.push("/app/camera");
+  }, [filtered, router, selectSku, selectedSku, skuList]);
+
   const handleClearAll = useCallback(() => {
     clearSku(); clearPhotos(); setShowClearConfirm(false); router.push("/app");
   }, [clearSku, clearPhotos, router]);
 
   if (!hydrated) {
     return <div className="flex min-h-dvh items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-input border-t-primary" /></div>;
-  }
-
-  if (skuList.length === 0) {
-    return (
-      <div className="flex min-h-[calc(100dvh-3rem)] flex-col items-center justify-center px-6">
-        <p className="mb-4 text-sm text-muted-foreground">暂无 SKU 数据</p>
-        <Link href="/app" className="rounded-pill bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:brightness-[0.98]">去上传文件</Link>
-      </div>
-    );
   }
 
   return (
@@ -98,12 +124,25 @@ export default function SKUListPage() {
       </div>
 
       <div className="flex-1 px-4 py-3">
+        {(error || notice) && (
+          <div className="mb-3">
+            {error && <div className="status-note status-note-danger">{error}</div>}
+            {!error && notice && <div className="status-note status-note-success">{notice}</div>}
+          </div>
+        )}
+
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-sm text-muted-foreground">{search ? `未找到匹配「${search}」的 SKU` : "暂无数据"}</p>
+            <p className="text-sm text-muted-foreground">
+              {skuList.length === 0
+                ? "暂无 SKU 数据，请先上传文件"
+                : search
+                  ? `未找到匹配「${search}」的 SKU`
+                  : "暂无数据"}
+            </p>
           </div>
         ) : (
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 pb-28">
             {filtered.map((sku, i) => (
               <SKUItem
                 key={sku}
@@ -115,6 +154,26 @@ export default function SKUListPage() {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="sticky bottom-0 z-20 border-t border-soft bg-[hsl(var(--surface-raised))/0.94] px-4 py-4 pb-[calc(env(safe-area-inset-bottom)+16px)] backdrop-blur-lg">
+        <div className="flex gap-3">
+          <Button
+            onClick={handleReupload}
+            variant="secondary"
+            fullWidth
+            loading={uploading}
+          >
+            Re-upload
+          </Button>
+          <Button
+            onClick={handleStartShooting}
+            fullWidth
+            disabled={skuList.length === 0}
+          >
+            Start Shooting
+          </Button>
+        </div>
       </div>
 
       {showClearConfirm && (

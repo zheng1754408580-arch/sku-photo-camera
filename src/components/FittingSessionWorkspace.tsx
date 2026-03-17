@@ -304,7 +304,7 @@ export function FittingSessionWorkspace({
             onClick={() => router.push(backPath)}
             className="text-sm font-medium tracking-[-0.01em] text-white/82 transition hover:text-white"
           >
-            List
+            Back to List
           </button>
           <div className="flex-1 px-3 pt-0.5 text-center">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/92">
@@ -322,7 +322,7 @@ export function FittingSessionWorkspace({
             disabled={!session}
             className="text-sm font-medium tracking-[-0.01em] text-[#C8FF3D] transition hover:text-[#E5FF8A] disabled:opacity-40"
           >
-            Done
+            Export
           </button>
         </div>
       </div>

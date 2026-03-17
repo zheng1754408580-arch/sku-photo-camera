@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
@@ -41,85 +40,82 @@ export function AuthLanding() {
   );
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
-      <div
-        className="relative flex flex-col items-center justify-start overflow-hidden bg-transparent px-6 pt-12"
-        style={{ height: "55vh", minHeight: 0 }}
-      >
-        <Image
-          src="/brand/tagloom-login-hero-combined.png"
-          alt="TagLoom hero artwork"
-          width={900}
-          height={1100}
-          className="pointer-events-none relative z-10 h-auto w-[88%] max-w-[430px] select-none bg-transparent object-contain"
-          priority
+    <div className="flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background px-0 sm:px-6 sm:py-6">
+      <div className="relative flex h-[100dvh] w-[min(100vw,calc(100dvh*1760/3824))] max-w-full flex-col overflow-hidden bg-background sm:h-[956px] sm:w-auto sm:max-w-[440px] sm:rounded-[2.5rem] sm:shadow-elevated">
+        <img
+          src="/brand/login-bg-fitnote.png"
+          alt="FitNote background illustration"
+          className="pointer-events-none absolute inset-0 h-full w-full object-contain object-top"
         />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(248,245,238,0.02),rgba(248,245,238,0.08)_40%,rgba(248,245,238,0.42)_62%,rgba(248,245,238,0.88)_78%,rgba(248,245,238,0.98)_100%)]" />
+
+        <div className="relative flex-[0_0_45%] sm:flex-[0_0_47%]" />
+
+        <SurfaceCard className="relative z-10 flex flex-1 flex-col rounded-t-[2rem] px-5 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-4 sm:rounded-t-[2rem]">
+          <h1 className="mb-0.5 font-display text-xl font-semibold text-foreground">
+            Sign in to get started
+          </h1>
+          <p className="mb-2.5 text-sm text-muted-foreground">
+            Welcome back. Please enter your details to continue.
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-2" noValidate>
+            <FormError
+              message={error}
+              className="mt-0 rounded-2xl bg-[hsl(var(--destructive))]/10 px-4 py-2.5"
+            />
+
+            <div>
+              <FormLabel htmlFor="email" required>
+                Work Email
+              </FormLabel>
+              <TextInput
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                required
+                disabled={loading}
+                error={!!error}
+                autoComplete="email"
+              />
+            </div>
+
+            <div>
+              <FormLabel htmlFor="password" required>
+                Password
+              </FormLabel>
+              <TextInput
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                disabled={loading}
+                error={!!error}
+                autoComplete="current-password"
+              />
+            </div>
+
+            <PrimaryButton type="submit" loading={loading} fullWidth>
+              {loading ? "Signing In..." : "Sign In"}
+            </PrimaryButton>
+          </form>
+
+          <p className="mt-2.5 text-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="font-medium text-primary hover:underline">
+              Request Access
+            </Link>
+          </p>
+
+          <p className="mt-2 text-center text-[7px] uppercase tracking-[0.18em] text-muted-foreground/70">
+            Designed &amp; Built by Jaden Zheng
+          </p>
+        </SurfaceCard>
       </div>
-
-      <SurfaceCard className="relative z-10 -mt-[1.75vh] flex flex-1 flex-col rounded-t-[2rem] px-6 pb-5 pt-6 sm:mx-auto sm:mb-4 sm:max-w-md sm:rounded-2xl">
-        <h1 className="mb-0.5 font-display text-xl font-semibold text-foreground">
-          Sign in to get started
-        </h1>
-        <p className="mb-4 text-sm text-muted-foreground">
-          Welcome back. Please enter your details to continue.
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-3" noValidate>
-          <FormError
-            message={error}
-            className="mt-0 rounded-2xl bg-[hsl(var(--destructive))]/10 px-4 py-3"
-          />
-
-          <div>
-            <FormLabel htmlFor="email" required>
-              Work Email
-            </FormLabel>
-            <TextInput
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-              required
-              disabled={loading}
-              error={!!error}
-              autoComplete="email"
-            />
-          </div>
-
-          <div>
-            <FormLabel htmlFor="password" required>
-              Password
-            </FormLabel>
-            <TextInput
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-              disabled={loading}
-              error={!!error}
-              autoComplete="current-password"
-            />
-          </div>
-
-          <PrimaryButton type="submit" loading={loading} fullWidth>
-            {loading ? "Signing In..." : "Sign In"}
-          </PrimaryButton>
-        </form>
-
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-medium text-primary hover:underline">
-            Request Access
-          </Link>
-        </p>
-
-        <p className="mt-auto pt-4 text-center text-[7px] uppercase tracking-[0.18em] text-muted-foreground/70">
-          Designed &amp; Built by Jaden Zheng
-        </p>
-      </SurfaceCard>
     </div>
   );
 }

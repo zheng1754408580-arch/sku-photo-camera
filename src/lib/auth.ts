@@ -33,7 +33,7 @@ export async function signUp(data: SignUpData): Promise<AuthResult> {
   }
 
   if (!authData.user) {
-    return { success: false, error: "注册失败，请稍后重试" };
+    return { success: false, error: "Sign-up failed. Please try again shortly." };
   }
 
   const { error: rpcError } = await supabase.rpc("create_access_request", {
@@ -137,19 +137,19 @@ export async function signOut(): Promise<void> {
 
 function mapAuthError(message: string): string {
   if (message.includes("Invalid login credentials")) {
-    return "邮箱或密码错误";
+    return "Incorrect email or password.";
   }
   if (message.includes("Email not confirmed")) {
-    return "邮箱未验证，请检查收件箱";
+    return "Your email is not verified yet. Please check your inbox.";
   }
   if (message.includes("User already registered")) {
-    return "该邮箱已注册，请直接登录";
+    return "This email is already registered. Please sign in instead.";
   }
   if (message.includes("Password should be at least")) {
-    return "密码长度至少 6 位";
+    return "Your password must be at least 6 characters.";
   }
   if (message.includes("rate limit")) {
-    return "操作过于频繁，请稍后再试";
+    return "Too many attempts. Please try again later.";
   }
   return message;
 }

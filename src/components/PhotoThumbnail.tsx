@@ -59,11 +59,11 @@ export const PhotoThumbnail = memo(function PhotoThumbnail({ uri, fileName, sele
       {showMenu && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-6" onClick={() => setShowMenu(false)}>
           <div className="w-full max-w-xs rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <p className="mb-1 text-center text-sm font-bold text-gray-900">删除照片</p>
-            <p className="mb-5 text-center text-xs text-gray-500">确定要删除 {fileName} 吗？</p>
+            <p className="mb-1 text-center text-sm font-bold text-gray-900">Delete Photo</p>
+            <p className="mb-5 text-center text-xs text-gray-500">Are you sure you want to delete {fileName}?</p>
             <div className="flex gap-3">
-              <button onClick={() => setShowMenu(false)} className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600">取消</button>
-              <button onClick={() => { setShowMenu(false); onDelete?.(); }} className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white">删除</button>
+              <button onClick={() => setShowMenu(false)} className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600">Cancel</button>
+              <button onClick={() => { setShowMenu(false); onDelete?.(); }} className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white">Delete</button>
             </div>
           </div>
         </div>

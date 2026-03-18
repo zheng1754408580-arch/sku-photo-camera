@@ -42,17 +42,17 @@ export default function PendingPage() {
           </svg>
         </div>
 
-        <h1 className="section-title mb-2 text-xl">申请已提交</h1>
+        <h1 className="section-title mb-2 text-xl">Request Submitted</h1>
         <p className="mb-8 text-sm text-muted-foreground">
-          你的使用申请正在等待管理员审批，审批通过后即可使用全部功能。
+          Your access request is waiting for admin approval. Once approved, you will be able to use the full workflow.
         </p>
 
         <div className="space-y-3">
           <Button onClick={handleRefresh} fullWidth>
-            刷新状态
+            Refresh Status
           </Button>
           <Button onClick={handleLogout} variant="secondary" fullWidth>
-            退出登录
+            Sign Out
           </Button>
         </div>
       </SurfaceCard>

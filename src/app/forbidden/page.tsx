@@ -37,17 +37,17 @@ export default function ForbiddenPage() {
           </svg>
         </div>
 
-        <h1 className="section-title mb-2 text-xl">无访问权限</h1>
+        <h1 className="section-title mb-2 text-xl">Access Denied</h1>
         <p className="mb-8 text-sm text-muted-foreground">
-          你没有权限访问该页面。此功能仅限管理员使用。
+          You do not have permission to access this page. This area is available to administrators only.
         </p>
 
         <div className="space-y-3">
           <Button onClick={handleBack} fullWidth>
-            返回应用
+            Back to App
           </Button>
           <Button onClick={handleLogout} variant="secondary" fullWidth>
-            退出登录
+            Sign Out
           </Button>
         </div>
       </SurfaceCard>

@@ -33,7 +33,7 @@ function validateFileType(file: File): void {
   if (!hasValidExt) {
     throw new FileParseError(
       "INVALID_TYPE",
-      `不支持的文件格式: ${file.name}。请选择 .xlsx、.xls 或 .csv 文件`,
+      `Unsupported file type: ${file.name}. Please choose a .xlsx, .xls, or .csv file.`,
     );
   }
 }
@@ -67,7 +67,7 @@ export function pickFile(): Promise<File> {
       const file = input.files?.[0];
       settle(() => {
         if (!file) {
-          reject(new FileParseError("USER_CANCELLED", "未选择文件"));
+          reject(new FileParseError("USER_CANCELLED", "No file selected."));
           return;
         }
         resolve(file);
@@ -103,7 +103,7 @@ export async function parseFile(file: File): Promise<string[]> {
   validateFileType(file);
 
   if (file.size === 0) {
-    throw new FileParseError("EMPTY_FILE", "文件为空，请选择包含 SKU 数据的文件");
+    throw new FileParseError("EMPTY_FILE", "The file is empty. Please choose a file that contains SKU data.");
   }
 
   try {
@@ -112,7 +112,7 @@ export async function parseFile(file: File): Promise<string[]> {
 
     const sheetName = workbook.SheetNames[0];
     if (!sheetName) {
-      throw new FileParseError("NO_DATA", "文件中没有找到工作表");
+      throw new FileParseError("NO_DATA", "No worksheet was found in the file.");
     }
 
     const sheet = workbook.Sheets[sheetName];
@@ -121,7 +121,7 @@ export async function parseFile(file: File): Promise<string[]> {
     }) as unknown[][];
 
     if (!rows || rows.length === 0) {
-      throw new FileParseError("NO_DATA", "工作表为空，没有找到数据");
+      throw new FileParseError("NO_DATA", "The worksheet is empty. No data was found.");
     }
 
     const skuList: string[] = [];
@@ -149,7 +149,7 @@ export async function parseFile(file: File): Promise<string[]> {
     if (skuList.length === 0) {
       throw new FileParseError(
         "NO_DATA",
-        "未找到有效的 SKU 数据，请确保第一列包含 SKU 编码",
+        "No valid SKU data was found. Make sure the first column contains SKU codes.",
       );
     }
 
@@ -158,7 +158,7 @@ export async function parseFile(file: File): Promise<string[]> {
     if (err instanceof FileParseError) throw err;
     throw new FileParseError(
       "PARSE_FAILED",
-      `文件解析失败: ${err instanceof Error ? err.message : "未知错误"}`,
+      `Failed to parse file: ${err instanceof Error ? err.message : "Unknown error"}`,
     );
   }
 }

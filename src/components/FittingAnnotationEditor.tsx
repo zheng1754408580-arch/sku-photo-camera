@@ -13,17 +13,18 @@ interface FittingAnnotationEditorProps {
   imageUri: string;
   initialActions?: AnnotationAction[];
   onClose: () => void;
+  onDelete?: () => void;
   onSave: (uri: string, actions: AnnotationAction[]) => void;
 }
 
 const TOOL_LABELS: Record<AnnotationTool, string> = {
-  pen: "画笔",
-  arrow: "箭头",
-  circle: "圈选",
-  text: "文字",
+  pen: "Pen",
+  arrow: "Arrow",
+  circle: "Circle",
+  text: "Text",
 };
 
-const DEFAULT_COLOR = "#ef4444";
+const DEFAULT_COLOR = "hsl(0 72% 55%)";
 const DEFAULT_SIZE = 5;
 const MAX_CANVAS_WIDTH = 900;
 
@@ -157,7 +158,7 @@ function drawActions(
   );
   const boxWidth = maxTextWidth + boxPaddingX * 2;
   const boxHeight = textActions.length * lineHeight + boxPaddingY * 2 - 8 * scale;
-  ctx.fillStyle = "rgba(0, 0, 0, 0.58)";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.94)";
   ctx.fillRect(startX - boxPaddingX, startY - boxPaddingY, boxWidth, boxHeight);
   ctx.restore();
 
@@ -179,6 +180,7 @@ export function FittingAnnotationEditor({
   imageUri,
   initialActions = [],
   onClose,
+  onDelete,
   onSave,
 }: FittingAnnotationEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -277,7 +279,7 @@ export function FittingAnnotationEditor({
   const handlePointerDown = (event: CanvasPointerEvent<HTMLCanvasElement>) => {
     const point = getPoint(event);
     if (tool === "text") {
-      const text = window.prompt("输入批注内容");
+      const text = window.prompt("Enter annotation text");
       if (!text?.trim()) return;
       setActions((prev) => [
         ...prev,
@@ -368,23 +370,25 @@ export function FittingAnnotationEditor({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 p-4">
-      <div className="mx-auto flex h-[calc(100dvh-2rem)] max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+    <div className="fixed inset-0 z-50 bg-[hsl(var(--foreground))/0.12] p-4 backdrop-blur-sm">
+      <div className="mx-auto flex h-[calc(100dvh-2rem)] max-w-4xl flex-col overflow-hidden rounded-[1.8rem] border border-soft bg-[hsl(var(--surface-raised))/0.84] shadow-card backdrop-blur-2xl">
+        <div className="flex items-center justify-between border-b border-soft px-4 py-2.5">
           <div>
-            <h3 className="text-base font-semibold text-gray-900">添加批注</h3>
-            <p className="text-xs text-gray-500">支持画笔、箭头、圈选、文字，保存后会生成标注结果图</p>
+            <h3 className="font-display text-base font-semibold text-foreground">Add Annotation</h3>
+            <p className="text-xs leading-5 text-muted-foreground">Use pen, arrow, circle, or text. Saving will generate the annotated image.</p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg px-3 py-1.5 text-sm text-gray-500 transition hover:bg-gray-100"
-          >
-            关闭
-          </button>
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="rounded-pill border border-[hsl(var(--destructive))/0.18] bg-[hsl(var(--destructive-soft))] px-4 py-2 text-sm font-medium text-destructive shadow-soft transition hover:brightness-[0.99]"
+            >
+              Delete Photo
+            </button>
+          )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-soft px-4 py-2.5">
           {ANNOTATION_TOOLS.map((item) => (
             <button
               key={item}
@@ -393,10 +397,10 @@ export function FittingAnnotationEditor({
                 setDraft(null);
                 setTool(item);
               }}
-              className={`rounded-full px-3 py-1.5 text-sm transition ${
+              className={`rounded-pill px-3 py-2 text-sm font-medium transition ${
                 tool === item
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-destructive text-destructive-foreground shadow-soft"
+                  : "border border-soft bg-surface-raised text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
               {TOOL_LABELS[item]}
@@ -406,16 +410,16 @@ export function FittingAnnotationEditor({
             type="button"
             onClick={handleUndo}
             disabled={actions.length === 0}
-            className="rounded-full border border-gray-200 px-3 py-1.5 text-sm text-gray-600 transition disabled:opacity-40"
+            className="rounded-pill border border-soft bg-surface-raised px-3 py-2 text-sm font-medium text-muted-foreground shadow-soft transition hover:bg-secondary hover:text-foreground disabled:opacity-40"
           >
-            撤销
+            Undo
           </button>
         </div>
 
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-gray-950 px-4 py-3">
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[hsl(var(--surface-tint))/0.5] px-3 py-2.5">
           <canvas
             ref={canvasRef}
-            className="mx-auto touch-none rounded-xl bg-black"
+            className="mx-auto touch-none rounded-[1.35rem] bg-transparent shadow-soft"
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -423,22 +427,22 @@ export function FittingAnnotationEditor({
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-          <p className="text-xs text-gray-500">文字工具点击画面后输入内容。保存后可再次编辑。</p>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-soft px-4 py-2.5">
+          <p className="text-xs leading-5 text-muted-foreground">Tap the image with the text tool to add a note. Saving replaces the current annotated result.</p>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600"
+              className="rounded-pill border border-soft bg-surface-raised px-4 py-2.5 text-sm font-medium text-muted-foreground shadow-soft"
             >
-              取消
+              Close
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white"
+              className="rounded-pill bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft"
             >
-              保存批注
+              Save Annotation
             </button>
           </div>
         </div>

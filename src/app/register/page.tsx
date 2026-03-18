@@ -26,7 +26,7 @@ export default function RegisterPage() {
       setError("");
 
       if (password.length < 6) {
-        setError("密码长度至少 6 位");
+        setError("Your password must be at least 6 characters.");
         return;
       }
 
@@ -41,13 +41,13 @@ export default function RegisterPage() {
         });
 
         if (!result.success) {
-          setError(result.error ?? "注册失败");
+          setError(result.error ?? "Sign-up failed.");
           return;
         }
 
         router.push(result.redirectTo ?? "/pending");
       } catch {
-        setError("网络错误，请稍后重试");
+        setError("Network error. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -57,10 +57,10 @@ export default function RegisterPage() {
 
   return (
     <div className="app-page flex min-h-dvh flex-col items-center justify-center px-6 py-10">
-      <SurfaceCard className="mx-auto w-full max-w-sm px-6 py-7">
-        <h1 className="section-title mb-1 text-center text-2xl">申请使用</h1>
-        <p className="mb-8 text-center text-sm text-muted-foreground">
-          填写信息提交申请，管理员审批后即可使用
+      <SurfaceCard className="mx-auto w-full max-w-sm px-6 py-7 shadow-elevated">
+        <h1 className="section-title mb-1 text-center text-[1.9rem]">Request Access</h1>
+        <p className="mx-auto mb-8 max-w-[28ch] text-center text-[0.95rem] leading-6 text-muted-foreground">
+          Submit your details for approval. Once approved, you will be able to use the app.
         </p>
 
         <FormError
@@ -71,21 +71,21 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <FormLabel htmlFor="name" required>
-              姓名
+              Name
             </FormLabel>
             <TextInput
               id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="你的姓名"
+              placeholder="Your name"
               required
               disabled={loading}
             />
           </div>
           <div>
             <FormLabel htmlFor="email" required>
-              邮箱
+              Work Email
             </FormLabel>
             <TextInput
               id="email"
@@ -99,14 +99,14 @@ export default function RegisterPage() {
           </div>
           <div>
             <FormLabel htmlFor="password" required>
-              设置密码
+              Password
             </FormLabel>
             <TextInput
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="至少 6 位"
+              placeholder="At least 6 characters"
               required
               minLength={6}
               disabled={loading}
@@ -114,15 +114,15 @@ export default function RegisterPage() {
           </div>
           <div>
             <FormLabel htmlFor="reason">
-              申请理由
-              <span className="ml-1 text-muted-foreground">（选填）</span>
+              Reason
+              <span className="ml-1 text-muted-foreground">(Optional)</span>
             </FormLabel>
             <TextArea
               id="reason"
               rows={3}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="简要说明申请原因..."
+              placeholder="Briefly explain why you need access..."
               className="resize-none"
               disabled={loading}
             />
@@ -130,23 +130,23 @@ export default function RegisterPage() {
           <Button type="submit" loading={loading} fullWidth>
             {loading ? (
               <>
-                提交中…
+                Submitting...
               </>
             ) : (
-              "提交申请"
+              "Submit Request"
             )}
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          已有账号？{" "}
+          Already have an account?{" "}
           <Link href="/login" className="font-medium text-primary hover:underline">
-            去登录
+            Sign In
           </Link>
         </p>
         <p className="mt-3 text-center">
           <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-            ← 返回首页
+            ← Back to Home
           </Link>
         </p>
       </SurfaceCard>

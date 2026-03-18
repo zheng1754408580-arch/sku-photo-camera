@@ -13,8 +13,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "SKU 照片命名相机",
-  description: "上传 SKU 文件，按编号自动命名拍摄的照片",
+  title: "SKU Camera",
+  description: "Upload SKU files and automatically name captured photos.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#007AFF",
+  themeColor: "#f8f5ee",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -37,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="en">
       <head>
         <link rel="apple-touch-icon" href="/icons/icon.svg" />
       </head>

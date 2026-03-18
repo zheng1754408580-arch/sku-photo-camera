@@ -10,10 +10,10 @@ export const FITTING_ROUND_LABELS: Record<(typeof FITTING_ROUNDS)[number], strin
 export const STANDARD_SHOT_TYPES = ["front", "side", "back"] as const;
 
 export const PHOTO_TYPE_LABELS = {
-  detail: "细节图",
-  front: "正面",
-  side: "侧面",
-  back: "背面",
+  detail: "Detail",
+  front: "Front",
+  side: "Side",
+  back: "Back",
 } as const;
 
 export const ANNOTATION_TOOLS = ["pen", "arrow", "circle", "text"] as const;

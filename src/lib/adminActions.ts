@@ -57,7 +57,7 @@ async function updateStatus(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { success: false, error: "未登录" };
+    return { success: false, error: "Not signed in." };
   }
 
   const { error } = await supabase

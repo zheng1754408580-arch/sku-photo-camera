@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/Button";
+import { SurfaceCard } from "@/components/ui/SurfaceCard";
 import type { PhotoItem } from "@/store/photoStore";
 
 interface PhotoPreviewModalProps {
@@ -15,30 +17,48 @@ export function PhotoPreviewModal({ photos, initialIndex, onClose, onDelete }: P
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const touchStartX = useRef(0);
   const touchDeltaX = useRef(0);
-  const [offsetX, setOffsetX] = useState(0);
-  const [swiping, setSwiping] = useState(false);
+  const trackRef = useRef<HTMLDivElement>(null);
 
-  const photo = photos[current];
-
-  useEffect(() => {
-    if (current >= photos.length && photos.length > 0) setCurrent(photos.length - 1);
-  }, [photos.length, current]);
+  const safeCurrent = photos.length === 0 ? -1 : Math.min(current, photos.length - 1);
+  const photo = safeCurrent >= 0 ? photos[safeCurrent] : null;
 
   useEffect(() => {
     if (!photo || photos.length === 0) onClose();
   }, [photo, photos.length, onClose]);
 
+  const resetTrackPosition = useCallback(() => {
+    if (!trackRef.current) return;
+    trackRef.current.style.transform = "translateX(0px)";
+    trackRef.current.style.transition = "transform 0.2s ease-out";
+  }, []);
+
   if (!photo || photos.length === 0) return null;
 
   const goTo = (idx: number) => { if (idx >= 0 && idx < photos.length) setCurrent(idx); };
 
-  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; touchDeltaX.current = 0; setSwiping(true); };
-  const handleTouchMove = (e: React.TouchEvent) => { const d = e.touches[0].clientX - touchStartX.current; touchDeltaX.current = d; setOffsetX(d); };
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+    if (trackRef.current) {
+      trackRef.current.style.transition = "none";
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const d = e.touches[0].clientX - touchStartX.current;
+    touchDeltaX.current = d;
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translateX(${d}px)`;
+    }
+  };
+
   const handleTouchEnd = () => {
-    setSwiping(false);
-    if (touchDeltaX.current < -60 && current < photos.length - 1) setCurrent(current + 1);
-    else if (touchDeltaX.current > 60 && current > 0) setCurrent(current - 1);
-    setOffsetX(0);
+    if (touchDeltaX.current < -60 && safeCurrent < photos.length - 1) {
+      setCurrent((prev) => Math.min(prev + 1, photos.length - 1));
+    } else if (touchDeltaX.current > 60 && safeCurrent > 0) {
+      setCurrent((prev) => Math.max(prev - 1, 0));
+    }
+    resetTrackPosition();
   };
 
   const handleDeleteCurrent = () => {
@@ -48,28 +68,38 @@ export function PhotoPreviewModal({ photos, initialIndex, onClose, onDelete }: P
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black">
+    <div className="fixed inset-0 z-50 flex flex-col app-dark-stage app-overlay-text">
       <div className="relative z-10 flex items-center justify-between px-4 pb-2 pt-[calc(env(safe-area-inset-top)+12px)]">
-        <button onClick={onClose} className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-sm">关闭</button>
-        <div className="text-center">
-          <p className="text-sm font-medium text-white">{photo.fileName}</p>
-          <p className="text-xs text-white/50">{current + 1} / {photos.length}</p>
+        <button
+          onClick={onClose}
+          className="min-h-11 min-w-11 rounded-pill app-overlay-chip px-4 py-2 text-sm font-medium transition hover:brightness-110"
+        >
+          Close
+        </button>
+        <div className="min-w-0 flex-1 px-3 text-center">
+          <p className="truncate text-sm font-medium app-overlay-text">{photo.fileName}</p>
+          <p className="text-xs app-overlay-muted">{safeCurrent + 1} / {photos.length}</p>
         </div>
-        <button onClick={() => setShowDeleteConfirm(true)} className="rounded-full bg-red-500/80 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-sm">删除</button>
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          className="min-h-11 min-w-11 rounded-pill border border-[hsl(var(--destructive))/0.18] bg-[hsl(var(--destructive-soft))] px-4 py-2 text-sm font-medium text-destructive shadow-soft transition hover:brightness-[0.99]"
+        >
+          Delete
+        </button>
       </div>
 
       <div className="relative flex flex-1 items-center justify-center overflow-hidden" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
-        {current > 0 && (
-          <button onClick={() => goTo(current - 1)} className="absolute left-2 z-10 hidden rounded-full bg-black/40 p-2 text-white backdrop-blur-sm md:flex">
+        {safeCurrent > 0 && (
+          <button onClick={() => goTo(safeCurrent - 1)} className="absolute left-2 z-10 hidden min-h-11 min-w-11 items-center justify-center rounded-pill app-overlay-chip p-2 md:flex">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
           </button>
         )}
-        <div className="flex h-full w-full items-center justify-center p-4" style={{ transform: `translateX(${swiping ? offsetX : 0}px)`, transition: swiping ? "none" : "transform 0.2s ease-out" }}>
+        <div ref={trackRef} className="flex h-full w-full items-center justify-center p-4 will-change-transform">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photo.uri} alt={photo.fileName} className="max-h-full max-w-full select-none object-contain" draggable={false} />
+          <img src={photo.uri} alt={photo.fileName} className="max-h-full max-w-full select-none object-contain" draggable={false} decoding="async" />
         </div>
-        {current < photos.length - 1 && (
-          <button onClick={() => goTo(current + 1)} className="absolute right-2 z-10 hidden rounded-full bg-black/40 p-2 text-white backdrop-blur-sm md:flex">
+        {safeCurrent < photos.length - 1 && (
+          <button onClick={() => goTo(safeCurrent + 1)} className="absolute right-2 z-10 hidden min-h-11 min-w-11 items-center justify-center rounded-pill app-overlay-chip p-2 md:flex">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
           </button>
         )}
@@ -78,21 +108,30 @@ export function PhotoPreviewModal({ photos, initialIndex, onClose, onDelete }: P
       {photos.length > 1 && (
         <div className="flex justify-center gap-1.5 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3">
           {photos.map((_, i) => (
-            <button key={i} onClick={() => goTo(i)} className={`h-1.5 rounded-full transition-all ${i === current ? "w-4 bg-white" : "w-1.5 bg-white/30"}`} />
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              aria-label={`View photo ${i + 1}`}
+              className="flex min-h-11 min-w-11 items-center justify-center"
+            >
+              <span
+                className={`block h-1.5 rounded-full transition-all ${i === safeCurrent ? "w-4 bg-[hsl(var(--surface-raised))]" : "w-1.5 bg-[hsl(var(--surface-raised))/0.32]"}`}
+              />
+            </button>
           ))}
         </div>
       )}
 
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-6" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="w-full max-w-xs rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <p className="mb-1 text-center text-sm font-bold text-gray-900">删除照片</p>
-            <p className="mb-5 text-center text-xs text-gray-500">确定要删除 {photo.fileName} 吗？此操作不可恢复。</p>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[hsl(var(--foreground))/0.22] px-6 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)}>
+          <SurfaceCard className="w-full max-w-xs p-5" onClick={(e) => e.stopPropagation()}>
+            <p className="section-title mb-1 text-center text-sm">Delete Photo</p>
+            <p className="mb-5 text-center text-xs text-muted-foreground">Are you sure you want to delete {photo.fileName}? This action cannot be undone.</p>
             <div className="flex gap-3">
-              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600">取消</button>
-              <button onClick={handleDeleteCurrent} className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white">删除</button>
+              <Button onClick={() => setShowDeleteConfirm(false)} variant="secondary" fullWidth>Cancel</Button>
+              <Button onClick={handleDeleteCurrent} variant="destructive" fullWidth>Delete</Button>
             </div>
-          </div>
+          </SurfaceCard>
         </div>
       )}
     </div>

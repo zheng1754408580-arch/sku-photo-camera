@@ -30,7 +30,7 @@ export async function exportAsZip(
   let current = 0;
   let total = 0;
   for (const sku of selectedSkus) total += photosMap[sku]?.length ?? 0;
-  if (total === 0) throw new Error("没有可导出的照片");
+  if (total === 0) throw new Error("No photos available for export.");
 
   for (const sku of selectedSkus) {
     const items = photosMap[sku] ?? [];
@@ -44,7 +44,7 @@ export async function exportAsZip(
 
   const content = await zip.generateAsync(
     { type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } },
-    (meta) => onProgress?.({ current: Math.round((meta.percent / 100) * total), total, currentSku: "压缩中…" }),
+    (meta) => onProgress?.({ current: Math.round((meta.percent / 100) * total), total, currentSku: "Compressing..." }),
   );
 
   const now = new Date();
@@ -61,7 +61,7 @@ export async function sharePhotos(
   let current = 0;
   let total = 0;
   for (const sku of selectedSkus) total += photosMap[sku]?.length ?? 0;
-  if (total === 0) throw new Error("没有可分享的照片");
+  if (total === 0) throw new Error("No photos available to share.");
 
   for (const sku of selectedSkus) {
     const items = photosMap[sku] ?? [];
@@ -73,7 +73,7 @@ export async function sharePhotos(
   }
 
   if (navigator.canShare && navigator.canShare({ files })) {
-    await navigator.share({ files, title: "SKU 照片" });
+    await navigator.share({ files, title: "SKU Photos" });
   } else {
     await exportAsZip(photosMap, selectedSkus, onProgress);
   }

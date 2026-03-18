@@ -33,13 +33,13 @@ export default function RejectedPage() {
           </svg>
         </div>
 
-        <h1 className="section-title mb-2 text-xl">申请未通过</h1>
+        <h1 className="section-title mb-2 text-xl">Request Not Approved</h1>
         <p className="mb-8 text-sm text-muted-foreground">
-          很抱歉，你的使用申请未通过审批。如有疑问，请联系管理员。
+          Your access request was not approved. Please contact an administrator if you need help.
         </p>
 
         <Button onClick={handleLogout} variant="secondary" fullWidth>
-          退出登录
+          Sign Out
         </Button>
       </SurfaceCard>
     </div>

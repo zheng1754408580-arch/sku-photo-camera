@@ -27,7 +27,7 @@ export default function AppHomePage() {
         return;
       }
       console.error("Failed to upload SKU file", err);
-      setError(err instanceof FileParseError ? err.message : "文件解析失败，请重试");
+      setError(err instanceof FileParseError ? err.message : "Failed to parse the file. Please try again.");
     } finally {
       setUploading(false);
     }

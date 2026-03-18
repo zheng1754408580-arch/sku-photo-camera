@@ -40,6 +40,7 @@ interface FittingSessionState {
     annotationData: AnnotationAction[],
   ) => void;
   deletePhoto: (sessionId: string, photoId: string) => void;
+  clearAll: () => void;
   completeSession: (sessionId: string) => void;
   getStandardShotStatus: (sessionId: string) => StandardShotStatus;
   getPhotoCountForStyle: (styleNo: string) => number;
@@ -213,6 +214,10 @@ export const useFittingSessionStore = create<FittingSessionState>()(
             },
           };
         });
+      },
+
+      clearAll: () => {
+        set({ sessions: {}, activeSessionId: null });
       },
 
       completeSession: (sessionId) => {

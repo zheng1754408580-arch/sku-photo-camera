@@ -49,9 +49,9 @@ export function AuthLanding() {
         />
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(248,245,238,0.02),rgba(248,245,238,0.08)_40%,rgba(248,245,238,0.42)_62%,rgba(248,245,238,0.88)_78%,rgba(248,245,238,0.98)_100%)]" />
 
-        <div className="relative flex-[0_0_45%] sm:flex-[0_0_47%]" />
+        <div className="relative flex-1" />
 
-        <SurfaceCard className="relative z-10 flex flex-1 flex-col rounded-t-[2rem] px-5 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-4 sm:rounded-t-[2rem]">
+        <SurfaceCard className="relative z-10 flex flex-none flex-col rounded-t-[2rem] px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 sm:rounded-t-[2rem]">
           <h1 className="mb-0.5 font-display text-xl font-semibold text-foreground">
             Sign in to get started
           </h1>
@@ -104,14 +104,14 @@ export function AuthLanding() {
             </PrimaryButton>
           </form>
 
-          <p className="mt-2.5 text-center text-sm text-muted-foreground">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-medium text-primary hover:underline">
+            <Link href="/request-access" className="font-medium text-primary hover:underline">
               Request Access
             </Link>
           </p>
 
-          <p className="mt-2 text-center text-[7px] uppercase tracking-[0.18em] text-muted-foreground/70">
+          <p className="mt-1.5 text-center text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80">
             Designed &amp; Built by Jaden Zheng
           </p>
         </SurfaceCard>

@@ -32,6 +32,11 @@
   --shadow-soft: 0 8px 24px hsl(220 20% 20% / 0.04);
   --shadow-card: 0 16px 40px hsl(220 20% 20% / 0.06);
   --shadow-elevated: 0 24px 60px hsl(220 20% 20% / 0.09);
+  --overlay-surface: 24 18% 15%;
+  --overlay-surface-strong: 24 16% 11%;
+  --overlay-border: 40 26% 86% / 0.16;
+  --overlay-text: 40 30% 96%;
+  --overlay-muted: 40 18% 88% / 0.68;
 }
 
 html {
@@ -42,6 +47,9 @@ body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-sans), Inter, ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.5;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
 }
 
 * {
@@ -196,10 +204,66 @@ body {
   backdrop-filter: blur(12px);
 }
 
+.app-overlay {
+  border: 1px solid hsl(var(--overlay-border));
+  background:
+    linear-gradient(
+      to bottom,
+      hsl(var(--overlay-surface) / 0.58),
+      hsl(var(--overlay-surface-strong) / 0.46)
+    );
+  box-shadow:
+    0 16px 36px hsl(220 20% 8% / 0.14),
+    inset 0 1px 0 hsl(var(--surface-raised) / 0.12);
+  backdrop-filter: blur(20px) saturate(132%);
+}
+
+.app-overlay-strong {
+  border: 1px solid hsl(var(--overlay-border));
+  background:
+    linear-gradient(
+      to bottom,
+      hsl(var(--overlay-surface) / 0.66),
+      hsl(var(--overlay-surface-strong) / 0.56)
+    );
+  box-shadow:
+    0 18px 42px hsl(220 20% 8% / 0.18),
+    inset 0 1px 0 hsl(var(--surface-raised) / 0.12);
+  backdrop-filter: blur(24px) saturate(138%);
+}
+
+.app-overlay-chip {
+  border: 1px solid hsl(var(--overlay-border));
+  background:
+    linear-gradient(
+      to bottom,
+      hsl(var(--overlay-surface) / 0.54),
+      hsl(var(--overlay-surface-strong) / 0.44)
+    );
+  color: hsl(var(--overlay-text));
+  box-shadow: inset 0 1px 0 hsl(var(--surface-raised) / 0.12);
+  backdrop-filter: blur(16px) saturate(128%);
+}
+
+.app-overlay-text {
+  color: hsl(var(--overlay-text));
+}
+
+.app-overlay-muted {
+  color: hsl(var(--overlay-muted));
+}
+
+.app-dark-stage {
+  background:
+    radial-gradient(circle at top, hsl(34 36% 30% / 0.22) 0%, transparent 34%),
+    linear-gradient(to bottom, hsl(34 10% 12%), hsl(26 10% 10%));
+}
+
 .section-title {
   font-family: var(--font-display), var(--font-sans), sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
+  line-height: 1.12;
 }
 
 .status-note {
@@ -207,7 +271,7 @@ body {
   border: 1px solid hsl(var(--border) / 0.64);
   padding: 0.9rem 1rem;
   font-size: 0.875rem;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .status-note-success {

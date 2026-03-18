@@ -13,9 +13,9 @@ import { Button } from "@/components/ui/Button";
 import { SurfaceCard } from "@/components/ui/SurfaceCard";
 
 const TABS: { key: AccessStatus; label: string }[] = [
-  { key: "pending", label: "待审批" },
-  { key: "approved", label: "已批准" },
-  { key: "rejected", label: "已拒绝" },
+  { key: "pending", label: "Pending" },
+  { key: "approved", label: "Approved" },
+  { key: "rejected", label: "Rejected" },
 ];
 
 export default function AdminPage() {
@@ -26,14 +26,32 @@ export default function AdminPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchList = useCallback(async (status: AccessStatus) => {
-    setLoading(true);
     const data = await getAccessRequests(status);
-    setList(data);
-    setLoading(false);
+    return data;
   }, []);
 
   useEffect(() => {
-    fetchList(tab);
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchList(tab);
+        if (!cancelled) {
+          setList(data);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
   }, [tab, fetchList]);
 
   const handleApprove = useCallback(
@@ -70,21 +88,21 @@ export default function AdminPage() {
       {/* 顶部栏 */}
       <div className="sticky top-0 z-10 border-b border-soft bg-[hsl(var(--surface-raised))/0.92] backdrop-blur-lg">
         <div className="flex items-center justify-between px-4 py-3">
-          <h1 className="section-title text-lg">管理后台</h1>
+          <h1 className="section-title text-lg">Admin</h1>
           <div className="flex gap-2">
             <Button
               onClick={() => router.push("/app")}
               variant="secondary"
               size="sm"
             >
-              应用
+              App
             </Button>
             <Button
               onClick={handleLogout}
               variant="secondary"
               size="sm"
             >
-              退出
+              Sign Out
             </Button>
           </div>
         </div>
@@ -115,7 +133,7 @@ export default function AdminPage() {
           </div>
         ) : list.length === 0 ? (
           <div className="py-16 text-center text-sm text-muted-foreground">
-            {tab === "pending" ? "暂无待审批申请" : "暂无记录"}
+            {tab === "pending" ? "No pending requests" : "No records found"}
           </div>
         ) : (
           <div className="space-y-3">
@@ -149,7 +167,7 @@ function RequestCard({
   onApprove: () => void;
   onReject: () => void;
 }) {
-  const time = new Date(item.created_at).toLocaleString("zh-CN", {
+  const time = new Date(item.created_at).toLocaleString("en-US", {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -157,7 +175,7 @@ function RequestCard({
   });
 
   const reviewTime = item.reviewed_at
-    ? new Date(item.reviewed_at).toLocaleString("zh-CN", {
+    ? new Date(item.reviewed_at).toLocaleString("en-US", {
         month: "2-digit",
         day: "2-digit",
         hour: "2-digit",
@@ -169,16 +187,16 @@ function RequestCard({
     <SurfaceCard className="rounded-[1.5rem] p-4 shadow-soft">
       <div className="mb-2 flex items-start justify-between">
         <div>
-          <p className="text-sm font-semibold text-foreground">
-            {item.display_name || "未填写姓名"}
+          <p className="break-words text-sm font-semibold text-foreground">
+            {item.display_name || "Unnamed user"}
           </p>
-          <p className="text-xs text-muted-foreground">{item.email}</p>
+          <p className="break-all text-xs text-muted-foreground">{item.email}</p>
         </div>
         <span className="text-xs text-muted-foreground">{time}</span>
       </div>
 
       {item.reason && (
-        <p className="mb-3 rounded-[1rem] bg-secondary px-3 py-2 text-xs text-muted-foreground">
+        <p className="break-words mb-3 rounded-[1rem] bg-secondary px-3 py-2 text-xs text-muted-foreground">
           {item.reason}
         </p>
       )}
@@ -191,7 +209,7 @@ function RequestCard({
             fullWidth
             className="bg-[hsl(var(--success))]"
           >
-            {isLoading ? "处理中…" : "批准"}
+            {isLoading ? "Processing..." : "Approve"}
           </Button>
           <Button
             onClick={onReject}
@@ -199,14 +217,14 @@ function RequestCard({
             variant="destructive"
             fullWidth
           >
-            拒绝
+            Reject
           </Button>
         </div>
       )}
 
       {tab !== "pending" && reviewTime && (
         <p className="text-xs text-muted-foreground">
-          {tab === "approved" ? "批准" : "拒绝"}于 {reviewTime}
+          {tab === "approved" ? "Approved" : "Rejected"} on {reviewTime}
         </p>
       )}
     </SurfaceCard>

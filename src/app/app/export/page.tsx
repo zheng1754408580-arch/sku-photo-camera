@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useMemo, useCallback, useEffect } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useSkuStore } from "@/store/skuStore";
 import { usePhotoStore } from "@/store/photoStore";
@@ -98,11 +99,9 @@ function ExportPageContent() {
     });
   }, []);
 
-  const toggleAll = useCallback(() => {
-    setSelected(
-      selected.size === skusWithPhotos.length ? new Set() : new Set(skusWithPhotos),
-    );
-  }, [selected.size, skusWithPhotos]);
+  const selectAll = useCallback(() => {
+    setSelected(new Set(skusWithPhotos));
+  }, [skusWithPhotos]);
 
   const handleExportZip = useCallback(async () => {
     if (selected.size === 0) return;
@@ -114,11 +113,11 @@ function ExportPageContent() {
       await exportAsZip(combinedPhotos, Array.from(selected), (p) =>
         setStatus({ step: "exporting", progress: p }),
       );
-      setStatus({ step: "done", method: "ZIP 下载" });
+      setStatus({ step: "done", method: "ZIP download" });
     } catch (err) {
       setStatus({
         step: "error",
-        message: err instanceof Error ? err.message : "导出失败",
+        message: err instanceof Error ? err.message : "Export failed",
       });
     }
   }, [combinedPhotos, selected]);
@@ -133,7 +132,7 @@ function ExportPageContent() {
       await sharePhotos(combinedPhotos, Array.from(selected), (p) =>
         setStatus({ step: "exporting", progress: p }),
       );
-      setStatus({ step: "done", method: "分享" });
+      setStatus({ step: "done", method: "Share" });
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
         setStatus({ step: "idle" });
@@ -141,7 +140,7 @@ function ExportPageContent() {
       }
       setStatus({
         step: "error",
-        message: err instanceof Error ? err.message : "分享失败",
+        message: err instanceof Error ? err.message : "Share failed",
       });
     }
   }, [combinedPhotos, selected]);
@@ -157,13 +156,12 @@ function ExportPageContent() {
   if (skusWithPhotos.length === 0) {
     return (
       <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] max-w-[430px] flex-col items-center justify-center px-6">
-        <p className="text-sm text-muted-foreground">暂无照片可导出</p>
-        <p className="mt-1 text-xs text-muted-foreground/80">请先拍摄照片后再进行导出</p>
+        <p className="text-sm text-muted-foreground">No photos available for export</p>
+        <p className="mt-1 text-xs text-muted-foreground/80">Capture photos first before exporting.</p>
       </div>
     );
   }
 
-  const allSelected = selected.size === skusWithPhotos.length;
   const progressPercent =
     status.step === "exporting" && status.progress.total > 0
       ? (status.progress.current / status.progress.total) * 100
@@ -171,22 +169,34 @@ function ExportPageContent() {
 
   return (
     <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] max-w-[430px] flex-col px-4 pb-4 pt-4">
-      <div className="app-panel px-4 py-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Export</p>
-        <h2 className="section-title mb-1 mt-2 text-lg">导出照片</h2>
-        <p className="text-sm text-muted-foreground">
-          {currentSession
-            ? `当前导出 ${currentSession.styleNo} / ${currentSession.fittingRound} 本轮照片，共 ${totalSelected} 张`
-            : `共 ${skusWithPhotos.length} 个 SKU 有照片，已选 ${selected.size} 个（${totalSelected} 张）`}
-        </p>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <Link
+          href="/app/camera"
+          className="inline-flex h-10 items-center rounded-pill border border-soft bg-surface-raised px-3 text-sm font-semibold text-primary shadow-soft transition hover:bg-secondary"
+        >
+          Back
+        </Link>
+        <Link
+          href="/app"
+          className="inline-flex h-10 items-center rounded-pill border border-soft bg-surface-raised px-3 text-sm font-semibold text-foreground shadow-soft transition hover:bg-secondary"
+        >
+          Home
+        </Link>
       </div>
 
       <div className="mt-3 flex items-center justify-between rounded-[1.4rem] border border-soft bg-[hsl(var(--surface-raised))/0.88] px-4 py-3 shadow-soft">
-        <button onClick={toggleAll} className="text-sm font-semibold text-primary transition hover:opacity-80">
-          {allSelected ? "取消全选" : "全选"}
+        <button
+          type="button"
+          onClick={selectAll}
+          className="text-sm font-semibold text-primary transition hover:opacity-80"
+        >
+          Select All
         </button>
         <span className="text-xs text-muted-foreground">
-          {selected.size} / {skusWithPhotos.length} 已选
+          {selected.size} / {skusWithPhotos.length} selected
+        </span>
+        <span className="text-xs text-muted-foreground">
+          {totalSelected} photos
         </span>
       </div>
 
@@ -200,10 +210,11 @@ function ExportPageContent() {
             <button
               key={sku}
               onClick={() => toggleSku(sku)}
+              aria-pressed={checked}
               className="flex w-full items-center gap-3 rounded-[1.25rem] border border-soft bg-surface-raised px-3 py-3 text-left shadow-soft transition hover:bg-secondary active:scale-[0.99]"
             >
               <div
-                className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border-2 transition ${
+                className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border-2 transition ${
                   checked ? "border-primary bg-primary" : "border-input bg-card"
                 }`}
               >
@@ -226,7 +237,7 @@ function ExportPageContent() {
               <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
                 {sku}
               </span>
-              <span className="text-xs text-muted-foreground">{count} 张</span>
+              <span className="text-xs text-muted-foreground">{count} photos</span>
             </button>
           );
         })}
@@ -236,7 +247,7 @@ function ExportPageContent() {
         <div className="mt-2 rounded-[1.4rem] border border-soft bg-[hsl(var(--surface-raised))/0.88] px-4 py-3 shadow-soft">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-semibold text-primary">
-              导出中… {status.progress.currentSku}
+              Exporting... {status.progress.currentSku}
             </span>
             <span className="text-xs text-muted-foreground">
               {status.progress.current} / {status.progress.total}
@@ -268,7 +279,7 @@ function ExportPageContent() {
               />
             </svg>
             <span className="text-sm font-semibold text-success-foreground">
-              {status.method}完成！
+              {status.method} complete
             </span>
           </div>
         </div>
@@ -300,7 +311,7 @@ function ExportPageContent() {
                 d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
               />
             </svg>
-            下载 ZIP
+            Download ZIP
           </Button>
           <Button
             onClick={handleShare}
@@ -321,7 +332,7 @@ function ExportPageContent() {
                 d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"
               />
             </svg>
-            分享
+            Share
           </Button>
         </div>
       </div>

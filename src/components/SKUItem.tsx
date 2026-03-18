@@ -19,7 +19,7 @@ export const SKUItem = memo(function SKUItem({ index, code, photoCount, onSelect
     >
       <span className="w-7 flex-shrink-0 text-center text-xs font-medium text-muted-foreground">{index}</span>
       <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{code}</span>
-      <span className={`text-xs font-semibold ${done ? "text-success-foreground" : "text-muted-foreground"}`}>{photoCount} 张</span>
+      <span className={`text-xs font-semibold ${done ? "text-success-foreground" : "text-muted-foreground"}`}>{photoCount} photos</span>
       <div className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${done ? "bg-success-soft text-success-foreground" : "bg-secondary text-muted-foreground"}`}>
         {done ? (
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">

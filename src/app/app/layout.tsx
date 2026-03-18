@@ -8,8 +8,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isHome = pathname === "/app";
   const isCamera = pathname === "/app/camera";
   const isFittingSession = pathname.startsWith("/app/fitting/session");
+  const isExport = pathname === "/app/export";
 
-  if (isCamera || isFittingSession) {
+  if (isCamera || isFittingSession || isExport) {
     return <>{children}</>;
   }
 
@@ -25,7 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
               </svg>
-              首页
+              Home
             </Link>
           </div>
         </header>

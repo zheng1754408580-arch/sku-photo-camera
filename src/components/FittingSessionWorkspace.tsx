@@ -31,11 +31,40 @@ const FittingAnnotationEditor = dynamic(
 
 type CameraStatus = "loading" | "ready" | "no-permission" | "no-camera" | "error";
 type WorkspaceTab = "detail" | "standard";
+const CAPTURE_ASPECT_RATIO = 3 / 4;
 
 interface FittingSessionWorkspaceProps {
   promptForRound?: boolean;
   backPath?: string;
   completePath?: string;
+}
+
+function getCenteredCrop(
+  sourceWidth: number,
+  sourceHeight: number,
+  targetAspectRatio: number,
+) {
+  const sourceAspectRatio = sourceWidth / sourceHeight;
+
+  if (sourceAspectRatio > targetAspectRatio) {
+    const cropWidth = sourceHeight * targetAspectRatio;
+    const offsetX = (sourceWidth - cropWidth) / 2;
+    return {
+      sx: offsetX,
+      sy: 0,
+      sw: cropWidth,
+      sh: sourceHeight,
+    };
+  }
+
+  const cropHeight = sourceWidth / targetAspectRatio;
+  const offsetY = (sourceHeight - cropHeight) / 2;
+  return {
+    sx: 0,
+    sy: offsetY,
+    sw: sourceWidth,
+    sh: cropHeight,
+  };
 }
 
 export function FittingSessionWorkspace({
@@ -154,9 +183,9 @@ export function FittingSessionWorkspace({
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facing,
-          width: { ideal: 1080 },
-          height: { ideal: 1440 },
-          aspectRatio: { ideal: 3 / 4 },
+          width: { ideal: 1536 },
+          height: { ideal: 2048 },
+          aspectRatio: { ideal: CAPTURE_ASPECT_RATIO },
         },
         audio: false,
       });
@@ -236,8 +265,13 @@ export function FittingSessionWorkspace({
         throw new Error("The camera preview is not ready yet. Please try again.");
       }
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      const crop = getCenteredCrop(
+        video.videoWidth,
+        video.videoHeight,
+        CAPTURE_ASPECT_RATIO,
+      );
+      canvas.width = Math.round(crop.sw);
+      canvas.height = Math.round(crop.sh);
       const ctx = canvas.getContext("2d");
       if (!ctx) throw new Error("Unable to create the capture canvas.");
 
@@ -246,7 +280,17 @@ export function FittingSessionWorkspace({
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
       }
-      ctx.drawImage(video, 0, 0);
+      ctx.drawImage(
+        video,
+        crop.sx,
+        crop.sy,
+        crop.sw,
+        crop.sh,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
       ctx.restore();
 
       const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
@@ -313,12 +357,12 @@ export function FittingSessionWorkspace({
     <div className="relative flex h-[100dvh] flex-col overflow-hidden app-dark-stage app-overlay-text">
       <canvas ref={canvasRef} className="hidden" />
 
-      <div className="shrink-0 px-4 pb-2 pt-[calc(env(safe-area-inset-top)+8px)]">
+      <div className="shrink-0 px-4 pb-1.5 pt-[calc(env(safe-area-inset-top)+6px)]">
         <div className="app-overlay mx-auto flex w-full max-w-[430px] items-start gap-3 rounded-[1.4rem] px-4 py-3">
           <button
             type="button"
             onClick={() => router.push(backPath)}
-            className="relative rounded-pill app-overlay-chip px-3 py-2 text-sm font-medium transition hover:brightness-110 before:absolute before:-inset-1.5 before:content-['']"
+            className="relative rounded-pill app-overlay-chip px-3 py-1.5 text-sm font-medium transition hover:brightness-110 before:absolute before:-inset-1.5 before:content-['']"
           >
             List
           </button>
@@ -336,22 +380,22 @@ export function FittingSessionWorkspace({
             type="button"
             onClick={handleCompleteSession}
             disabled={!session}
-            className="relative rounded-pill app-overlay-chip px-3 py-2 text-sm font-medium transition hover:brightness-110 disabled:opacity-40 before:absolute before:-inset-1.5 before:content-['']"
+            className="relative rounded-pill app-overlay-chip px-3 py-1.5 text-sm font-medium transition hover:brightness-110 disabled:opacity-40 before:absolute before:-inset-1.5 before:content-['']"
           >
             Export
           </button>
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 items-center justify-center px-4 pb-2">
-        <div className="relative mx-auto flex aspect-[3/4] max-h-full w-full max-w-[430px] items-center justify-center overflow-hidden rounded-[2rem] border border-[hsl(var(--overlay-border))] bg-[hsl(var(--overlay-surface-strong))/0.16] shadow-[0_14px_32px_hsl(220_20%_8%_/0.12)]">
+      <div className="flex min-h-0 flex-1 items-center justify-center px-3.5 pb-1">
+        <div className="relative mx-auto flex aspect-[3/4] h-full max-h-[calc(100dvh-14rem)] w-full max-w-[430px] items-center justify-center overflow-hidden rounded-[1.85rem] border border-[hsl(var(--overlay-border))] bg-[hsl(var(--overlay-surface-strong))/0.1] shadow-[0_12px_28px_hsl(220_20%_8%_/0.1)]">
           {session && status === "ready" && (
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
-              className={`h-full w-full object-contain ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
+              className={`h-full w-full object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
             />
           )}
           {session && status === "loading" && (
@@ -389,30 +433,30 @@ export function FittingSessionWorkspace({
               </button>
             </div>
           )}
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(18,16,14,0.18),transparent_14%,transparent_82%,rgba(18,16,14,0.28))]" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(22,18,14,0.1),transparent_12%,transparent_84%,rgba(22,18,14,0.16))]" />
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute left-[8%] top-[8%] h-9 w-9 rounded-tl-[1rem] border-l-2 border-t-2 border-white/82" />
-            <div className="absolute right-[8%] top-[8%] h-9 w-9 rounded-tr-[1rem] border-r-2 border-t-2 border-white/82" />
-            <div className="absolute bottom-[8%] left-[8%] h-9 w-9 rounded-bl-[1rem] border-b-2 border-l-2 border-white/82" />
-            <div className="absolute bottom-[8%] right-[8%] h-9 w-9 rounded-br-[1rem] border-b-2 border-r-2 border-white/82" />
+            <div className="absolute left-[8%] top-[8%] h-8 w-8 rounded-tl-[0.95rem] border-l-2 border-t-2 border-white/76" />
+            <div className="absolute right-[8%] top-[8%] h-8 w-8 rounded-tr-[0.95rem] border-r-2 border-t-2 border-white/76" />
+            <div className="absolute bottom-[8%] left-[8%] h-8 w-8 rounded-bl-[0.95rem] border-b-2 border-l-2 border-white/76" />
+            <div className="absolute bottom-[8%] right-[8%] h-8 w-8 rounded-br-[0.95rem] border-b-2 border-r-2 border-white/76" />
           </div>
           {session && flash && <div className="absolute inset-0 z-10 bg-white" />}
         </div>
       </div>
 
-      <div className="shrink-0 px-4 pb-[calc(env(safe-area-inset-bottom)+8px)]">
+      <div className="shrink-0 px-3.5 pb-[calc(env(safe-area-inset-bottom)+6px)]">
         <div className="mx-auto w-full max-w-[430px]">
           {error && (
-            <div className="mb-2">
-              <div className="rounded-[1rem] border border-[hsl(var(--destructive))/0.2] bg-[hsl(var(--destructive-soft))/0.78] px-3.5 py-2 text-sm text-destructive backdrop-blur-xl">
+            <div className="mb-1.5">
+              <div className="rounded-[0.95rem] border border-[hsl(var(--destructive))/0.18] bg-[hsl(var(--destructive-soft))/0.72] px-3 py-1.5 text-sm text-destructive backdrop-blur-xl">
                 {error}
               </div>
             </div>
           )}
 
-          <div className="app-overlay mb-2 rounded-[1.35rem] px-2.5 py-2">
+          <div className="app-overlay mb-1.5 rounded-[1.2rem] px-2 py-1.5">
             {tab === "detail" ? (
-              <div ref={galleryRef} className="flex h-[52px] gap-2 overflow-x-auto scrollbar-hide">
+              <div ref={galleryRef} className="flex h-[48px] gap-1.5 overflow-x-auto scrollbar-hide">
                 {(previewStripPhotos.length > 0 ? previewStripPhotos : activePhotos).map((photo) => (
                   <button
                     type="button"
@@ -422,7 +466,7 @@ export function FittingSessionWorkspace({
                         setAnnotatingPhotoId(photo.id);
                       }
                     }}
-                    className="relative h-[52px] w-[42px] flex-shrink-0 overflow-hidden rounded-[0.9rem] border border-[hsl(var(--overlay-border))] bg-[hsl(var(--overlay-surface))/0.36] before:absolute before:-inset-1 before:content-['']"
+                    className="relative h-[48px] w-[38px] flex-shrink-0 overflow-hidden rounded-[0.85rem] border border-[hsl(var(--overlay-border))] bg-[hsl(var(--overlay-surface))/0.26] before:absolute before:-inset-1 before:content-['']"
                   >
                     <img
                       src={photo.uri}
@@ -432,13 +476,13 @@ export function FittingSessionWorkspace({
                   </button>
                 ))}
                 {previewStripPhotos.length === 0 && (
-                  <div className="flex h-[52px] items-center text-[11px] app-overlay-muted">
+                  <div className="flex h-[48px] items-center text-[11px] app-overlay-muted">
                     Capture detail photos
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex h-[52px] gap-2">
+              <div className="flex h-[48px] gap-1.5">
                 {STANDARD_SHOT_TYPES.map((type) => {
                   const done = standardStatus[type];
                   const photo = standardPhotoMap[type];
@@ -447,12 +491,12 @@ export function FittingSessionWorkspace({
                       key={type}
                       type="button"
                       onClick={() => setCurrentShotType(type)}
-                      className={`relative flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded-[0.9rem] border px-2.5 py-1.5 text-[11px] font-medium transition before:absolute before:-inset-1 before:content-[''] ${
+                      className={`relative flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded-[0.85rem] border px-2 py-1.5 text-[11px] font-medium transition before:absolute before:-inset-1 before:content-[''] ${
                         currentShotType === type
-                          ? "border-[hsl(var(--overlay-border))] bg-[hsl(var(--surface-raised))/0.16] app-overlay-text"
+                          ? "border-[hsl(var(--overlay-border))] bg-[hsl(var(--surface-raised))/0.18] app-overlay-text"
                           : done
-                            ? "border-[hsl(var(--overlay-border))] bg-[hsl(var(--surface-raised))/0.12] app-overlay-text"
-                            : "border-[hsl(var(--overlay-border))] bg-[hsl(var(--overlay-surface))/0.44] app-overlay-muted"
+                            ? "border-[hsl(var(--overlay-border))] bg-[hsl(var(--surface-raised))/0.14] app-overlay-text"
+                            : "border-[hsl(var(--overlay-border))] bg-[hsl(var(--overlay-surface))/0.28] app-overlay-muted"
                       }`}
                     >
                       {photo ? (
@@ -462,7 +506,7 @@ export function FittingSessionWorkspace({
                             alt={photo.fileName}
                             className="absolute inset-0 h-full w-full object-cover"
                           />
-                          <div className="absolute inset-0 bg-[hsl(var(--overlay-surface-strong))/0.16]" />
+                          <div className="absolute inset-0 bg-[hsl(var(--overlay-surface-strong))/0.08]" />
                         </>
                       ) : null}
                       <span className={`relative z-10 ${photo ? "sr-only" : ""}`}>
@@ -475,12 +519,12 @@ export function FittingSessionWorkspace({
             )}
           </div>
 
-          <div className="app-overlay mb-2 flex items-center justify-between rounded-[1.5rem] px-3.5 py-2.5">
+          <div className="app-overlay mb-1.5 flex items-center justify-between rounded-[1.35rem] px-3 py-2">
             <button
               type="button"
               onClick={() => handleSwitchSku("prev")}
               disabled={currentIndex <= 0}
-              className="relative app-overlay-chip flex h-[46px] w-[46px] items-center justify-center rounded-full transition hover:brightness-110 disabled:opacity-25 before:absolute before:-inset-2 before:content-['']"
+              className="relative app-overlay-chip flex h-[42px] w-[42px] items-center justify-center rounded-full transition hover:brightness-110 disabled:opacity-25 before:absolute before:-inset-2 before:content-['']"
               aria-label="Previous look"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
@@ -492,18 +536,18 @@ export function FittingSessionWorkspace({
               type="button"
               onClick={handleCapture}
               disabled={!session || status !== "ready" || capturing}
-              className="relative app-overlay-strong flex h-[82px] w-[82px] items-center justify-center rounded-full transition active:scale-95 disabled:opacity-40 before:absolute before:-inset-2 before:content-['']"
+              className="relative app-overlay-strong flex h-[78px] w-[78px] items-center justify-center rounded-full transition active:scale-95 disabled:opacity-40 before:absolute before:-inset-2 before:content-['']"
               aria-label="Capture"
             >
-              <span className="absolute inset-[6px] rounded-full border border-white/62" />
-              <span className="h-[52px] w-[52px] rounded-full bg-[rgba(255,255,255,0.96)]" />
+              <span className="absolute inset-[6px] rounded-full border border-white/58" />
+              <span className="h-[48px] w-[48px] rounded-full bg-[rgba(255,255,255,0.95)]" />
             </button>
 
             <button
               type="button"
               onClick={() => handleSwitchSku("next")}
               disabled={currentIndex >= skuList.length - 1}
-              className="relative app-overlay-chip flex h-[46px] w-[46px] items-center justify-center rounded-full transition hover:brightness-110 disabled:opacity-25 before:absolute before:-inset-2 before:content-['']"
+              className="relative app-overlay-chip flex h-[42px] w-[42px] items-center justify-center rounded-full transition hover:brightness-110 disabled:opacity-25 before:absolute before:-inset-2 before:content-['']"
               aria-label="Next look"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
@@ -512,7 +556,7 @@ export function FittingSessionWorkspace({
             </button>
           </div>
 
-          <div className="app-overlay mx-auto max-w-[210px] rounded-[1.1rem] p-1">
+          <div className="app-overlay mx-auto max-w-[198px] rounded-[1rem] p-1">
             <div className="flex">
               <button
                 type="button"
@@ -520,7 +564,7 @@ export function FittingSessionWorkspace({
                   setTab("detail");
                   setError("");
                 }}
-                className={`relative flex-1 rounded-[0.9rem] px-3 py-1.5 text-[13px] font-medium transition before:absolute before:-inset-1 before:content-[''] ${
+                className={`relative flex-1 rounded-[0.82rem] px-3 py-1.5 text-[13px] font-medium transition before:absolute before:-inset-1 before:content-[''] ${
                   tab === "detail" ? "bg-[hsl(var(--surface-raised))/0.16] app-overlay-text" : "app-overlay-muted"
                 }`}
                 disabled={!session}
@@ -533,7 +577,7 @@ export function FittingSessionWorkspace({
                   setTab("standard");
                   setError("");
                 }}
-                className={`relative flex-1 rounded-[0.9rem] px-3 py-1.5 text-[13px] font-medium transition before:absolute before:-inset-1 before:content-[''] ${
+                className={`relative flex-1 rounded-[0.82rem] px-3 py-1.5 text-[13px] font-medium transition before:absolute before:-inset-1 before:content-[''] ${
                   tab === "standard" ? "bg-[hsl(var(--surface-raised))/0.16] app-overlay-text" : "app-overlay-muted"
                 }`}
                 disabled={!session}

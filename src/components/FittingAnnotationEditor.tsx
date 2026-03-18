@@ -370,9 +370,9 @@ export function FittingAnnotationEditor({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[hsl(var(--foreground))/0.18] p-4 backdrop-blur-sm">
-      <div className="mx-auto flex h-[calc(100dvh-2rem)] max-w-4xl flex-col overflow-hidden rounded-[2rem] border border-soft bg-[hsl(var(--surface-raised))/0.98] shadow-elevated">
-        <div className="flex items-center justify-between border-b border-soft px-4 py-3">
+    <div className="fixed inset-0 z-50 bg-[hsl(var(--foreground))/0.12] p-4 backdrop-blur-sm">
+      <div className="mx-auto flex h-[calc(100dvh-2rem)] max-w-4xl flex-col overflow-hidden rounded-[1.8rem] border border-soft bg-[hsl(var(--surface-raised))/0.84] shadow-card backdrop-blur-2xl">
+        <div className="flex items-center justify-between border-b border-soft px-4 py-2.5">
           <div>
             <h3 className="font-display text-base font-semibold text-foreground">Add Annotation</h3>
             <p className="text-xs leading-5 text-muted-foreground">Use pen, arrow, circle, or text. Saving will generate the annotated image.</p>
@@ -388,7 +388,7 @@ export function FittingAnnotationEditor({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-b border-soft px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-soft px-4 py-2.5">
           {ANNOTATION_TOOLS.map((item) => (
             <button
               key={item}
@@ -416,10 +416,10 @@ export function FittingAnnotationEditor({
           </button>
         </div>
 
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[hsl(var(--surface-tint))] px-4 py-3">
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[hsl(var(--surface-tint))/0.5] px-3 py-2.5">
           <canvas
             ref={canvasRef}
-            className="mx-auto touch-none rounded-[1.5rem] border border-soft bg-card shadow-card"
+            className="mx-auto touch-none rounded-[1.35rem] bg-transparent shadow-soft"
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -427,7 +427,7 @@ export function FittingAnnotationEditor({
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-soft px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-soft px-4 py-2.5">
           <p className="text-xs leading-5 text-muted-foreground">Tap the image with the text tool to add a note. Saving replaces the current annotated result.</p>
           <div className="flex gap-2">
             <button
